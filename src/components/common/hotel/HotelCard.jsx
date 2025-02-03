@@ -1,10 +1,19 @@
+import { useNavigate } from "react-router-dom";
 import MediaImage from "../media/MediaImage";
 
 const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
 
+  const navigate = useNavigate(); // 使用 useNavigate 实现导航
+
+  const handleCardClick = () => {
+    navigate(`/hotels/${hotel.uuid}`); // 跳转到对应的 HotelDetailPage
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+    <div 
+      onClick={handleCardClick}
+      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
         {/* image area */}
         <div className="w-full h-48 overflow-hidden">
           <MediaImage uuid={hotel.image} fileType={"Small Thumbnail"}/>

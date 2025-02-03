@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Link } from "lucide-react";
 import {} from "lucide-react"
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
@@ -113,7 +114,7 @@ const HotelPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {hotels.length > 0 ? (
               hotels.map((hotel) => (
-                <HotelCard key={hotel.uuid} hotel={hotel}/>
+                  <HotelCard key={hotel.uuid} hotel={hotel}/>
               ))
             ) : (
               <p className="text-center text-gray-600 mt-8 col-span-full">No matching hotels were found.</p>
