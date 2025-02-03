@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Navbar = () => (
     <nav className="bg-blue-600 text-white">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -5,15 +7,15 @@ const Navbar = () => (
           Singapore Travel
         </a>
         <div className="hidden md:flex space-x-4">
-          <a href="#" className="hover:text-blue-200 transition duration-300">
+          <Link to="/" className="hover:text-blue-200 transition duration-300">
             Home
-          </a>
+          </Link>
           <a href="#" className="hover:text-blue-200 transition duration-300">
             Flight
           </a>
-          <a href="#" className="hover:text-blue-200 transition duration-300">
+          <Link to="/hotels" className="hover:text-blue-200 transition duration-300">
             Hotels
-          </a>
+          </Link>
           <a href="#" className="hover:text-blue-200 transition duration-300">
             Atrractions
           </a>
