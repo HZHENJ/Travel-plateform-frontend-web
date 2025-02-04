@@ -1,58 +1,11 @@
-import { useState } from "react"
-import {
-  ArrowLeft,
-  ArrowRight,
-  Star,
-  Wifi,
-  PocketIcon as Pool,
-  Dumbbell,
-  Utensils,
-  Coffee,
-  Tv,
-  Car,
-  Snowflake,
-  Users,
-  BedDouble,
-  MapPin,
-} from "lucide-react"
+import { useEffect, useState } from "react"
+import { ArrowLeft, ArrowRight, Star, MapPin} from "lucide-react"
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
+import { useNavigate, useParams } from "react-router-dom";
+import { fetchHotelsByUUID } from "../../api/hotels";
 
-const amenityIcons = {
-  "免费Wi-Fi": <Wifi className="w-5 h-5" />,
-  游泳池: <Pool className="w-5 h-5" />,
-  健身中心: <Dumbbell className="w-5 h-5" />,
-  餐厅: <Utensils className="w-5 h-5" />,
-  咖啡厅: <Coffee className="w-5 h-5" />,
-  电视: <Tv className="w-5 h-5" />,
-  停车场: <Car className="w-5 h-5" />,
-  空调: <Snowflake className="w-5 h-5" />,
-}
-
-const hotel = {
-  id: 1,
-  name: "滨海湾金沙酒店",
-  images: [
-    "/placeholder.svg?height=400&width=600&text=滨海湾金沙酒店1",
-    "/placeholder.svg?height=400&width=600&text=滨海湾金沙酒店2",
-    "/placeholder.svg?height=400&width=600&text=滨海湾金沙酒店3",
-    "/placeholder.svg?height=400&width=600&text=滨海湾金沙酒店4",
-  ],
-  price: 1500,
-  rating: 4.8,
-  reviewCount: 1234,
-  location: "滨海湾",
-  amenities: ["免费Wi-Fi", "游泳池", "健身中心", "餐厅", "咖啡厅", "电视", "停车场", "空调"],
-  description:
-    "滨海湾金沙酒店是新加坡的标志性建筑之一，位于滨海湾中心地带。这家豪华五星级酒店以其令人惊叹的无边泳池和壮观的城市景观而闻名。",
-  longDescription:
-    "滨海湾金沙酒店不仅仅是一家酒店，它是一个综合度假胜地。酒店内设有世界级的赌场、豪华购物中心、艺术科学博物馆以及多家米其林星级餐厅。位于酒店顶层的无边泳池是世界上最大的空中泳池之一，提供了令人惊叹的360度全景。无论是商务旅行还是休闲度假，滨海湾金沙酒店都能为客人提供难忘的奢华体验。",
-  rooms: [
-    { type: "豪华客房", price: 1500, capacity: 2 },
-    { type: "尊贵套房", price: 2500, capacity: 2 },
-    { type: "家庭套房", price: 3000, capacity: 4 },
-  ],
-}
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ImageCarousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -65,6 +18,10 @@ const ImageCarousel = ({ images }) => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length)
   }
 
+  const getImageURLByUUID = (uuid, fileType) => {
+    return `${BACKEND_URL}/proxy/media/${uuid}${fileType ? '?fileType=' + encodeURIComponent(fileType) : ''}`;
+  }
+
   return (
     <div className="relative w-full h-96">
       {images.map((image, index) => (
@@ -74,9 +31,12 @@ const ImageCarousel = ({ images }) => {
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
         >
-          <img src={image || "/placeholder.svg"} alt={`酒店图片 ${index + 1}`} className="w-full h-full object-cover" />
+          <img
+            src={getImageURLByUUID(image.uuid, "Thumbnail 1080h") || "/placeholder.svg"}
+            alt={`images ${index + 1}`} className="w-full h-full object-cover" />
         </div>
       ))}
+
       <button
         onClick={prevSlide}
         className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
@@ -93,50 +53,80 @@ const ImageCarousel = ({ images }) => {
   )
 }
 
-export default function HotelDetail() {
+const HotelDetailPage = () => {
+  const { uuid } = useParams();
+  const [hotelDetial, setHotels] = useState(null)
+  const navigate = useNavigate();
+
+  // back to Hotels page
+  const turnBack = () => {
+    navigate('/hotels');
+  }
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetchHotelsByUUID(uuid);
+        const hotel_ = Array.isArray(response.data) && response.data.length > 0 ? response.data[0] : null;
+        setHotels(hotel_)
+      } catch (error) {
+        console.error("HotelDetail", error)
+      }
+    };
+    getData();
+  }, [uuid]);
+
+  console.log("hotel detail:", hotelDetial)
+
+  if (!hotelDetial) {
+    return <p>Loading ... </p>
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="container mx-auto px-4 py-8">
-          <button className="flex items-center text-blue-600 hover:text-blue-800 mb-4">
+          <button 
+            onClick={turnBack}
+            className="flex items-center text-blue-600 hover:text-blue-800 mb-4" >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            <span>返回酒店列表</span>
+            <span>Return to hotel list</span>
           </button>
 
-          <ImageCarousel images={hotel.images} />
+          <ImageCarousel images={hotelDetial.images} />
 
           <div className="mt-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-2">{hotel.name}</h1>
+              <h1 className="text-3xl font-bold mb-2">{hotelDetial.name}</h1>
               <div className="flex items-center mb-4">
                 <Star className="text-yellow-400 w-5 h-5" />
-                <span className="ml-1 font-semibold">{hotel.rating}</span>
-                <span className="ml-2 text-gray-600">({hotel.reviewCount} 条评价)</span>
+                <span className="ml-1 font-semibold">{hotelDetial.rating}</span>
+                <span className="ml-2 text-gray-600">({1000}+ reviews)</span>
               </div>
               <p className="flex items-center text-gray-600 mb-4">
                 <MapPin className="w-5 h-5 mr-2" />
-                {hotel.location}
+                {hotelDetial.address
+                ? `${hotelDetial.address.block || ""} ${hotelDetial.address.streetName || ""}, ${hotelDetial.address.postalCode || ""}`
+                : "Unknown address"}
               </p>
-              <p className="text-gray-700 mb-6">{hotel.description}</p>
-              <h2 className="text-xl font-semibold mb-2">酒店设施</h2>
+              <h2 className="text-xl font-semibold mb-2">Amenities</h2>
               <div className="flex flex-wrap mb-6">
-                {hotel.amenities.map((amenity, index) => (
-                  <span
-                    key={index}
-                    className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2"
-                  >
-                    {amenityIcons[amenity]}
-                    <span className="ml-1">{amenity}</span>
-                  </span>
-                ))}
+                {
+                  hotelDetial.amenities ? hotelDetial.amenities.split(/[;,]/).slice(0, 4).map((amenity, index) =>(
+                    <span key={index} className="bg-gray-200 text-sm rounded-full px-2 py-1 m-1">
+                      {amenity.trim()}
+                    </span>
+                  ))
+                  : <span className="text-gray-500">No amenities available</span>
+                }
               </div>
-              <h2 className="text-xl font-semibold mb-2">酒店详情</h2>
-              <p className="text-gray-700 mb-6">{hotel.longDescription}</p>
+              <h2 className="text-xl font-semibold mb-2">Description</h2>
+              <p className="text-gray-700 mb-6">{hotelDetial.description}</p>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold mb-4">选择房型</h2>
+            {/* <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-4">Select room type</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {hotel.rooms.map((room, index) => (
                   <div key={index} className="p-4 border rounded-lg">
@@ -156,7 +146,7 @@ export default function HotelDetail() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </main>
@@ -164,4 +154,6 @@ export default function HotelDetail() {
     </div>
   )
 }
+
+export default HotelDetailPage;
 

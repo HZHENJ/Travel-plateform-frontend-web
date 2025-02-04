@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Link } from "lucide-react";
+
 import {} from "lucide-react"
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
@@ -26,6 +26,8 @@ const HotelPage = () => {
           const newHotels = transformHotels(response.data.data);
           setHotels(newHotels);
 
+          console.log("newHotels", newHotels)
+
           // 2.get total pages
           setTotalPages(Math.ceil(response.data.totalRecords / hotelsPerPage));
         } 
@@ -47,7 +49,7 @@ const HotelPage = () => {
       image: (hotel.thumbnails && hotel.thumbnails.length > 0)
       ? hotel.thumbnails[0].uuid
       : "101bc4fab99f6d6476d9fc609a50c20ebc6", 
-      amenities: hotel.amenities ? hotel.amenities.split(",") : [], // 处理设施
+      amenities: hotel.amenities ? hotel.amenities.split(/[;,]/) : [], // 处理设施
     }))
   }
 
