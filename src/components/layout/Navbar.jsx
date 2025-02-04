@@ -16,9 +16,9 @@ const Navbar = () => (
           <Link to="/hotels" className="hover:text-blue-200 transition duration-300">
             Hotels
           </Link>
-          <a href="#" className="hover:text-blue-200 transition duration-300">
+          <Link to="/attractions" className="hover:text-blue-200 transition duration-300">
             Atrractions
-          </a>
+          </Link>
           <a href="#" className="hover:text-blue-200 transition duration-300">
             Schedule
           </a>
