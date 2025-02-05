@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react"
-
 import {} from "lucide-react"
+import { useState, useEffect } from "react"
+import { fetchHotels } from "../../api/hotels"
+
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 import HotelCard from "../../components/common/hotel/HotelCard"
-import { fetchHotels } from "../../api/hotels"
 import Pagination from "../../components/common/Pagination";
 
 // 
@@ -26,7 +26,7 @@ const HotelPage = () => {
           const newHotels = transformHotels(response.data.data);
           setHotels(newHotels);
 
-          console.log("newHotels", newHotels)
+          console.log("Hotels", newHotels)
 
           // 2.get total pages
           setTotalPages(Math.ceil(response.data.totalRecords / hotelsPerPage));
@@ -122,7 +122,6 @@ const HotelPage = () => {
               <p className="text-center text-gray-600 mt-8 col-span-full">No matching hotels were found.</p>
             )}
           </div>
-          
           <Pagination totalPages={totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
         </div>
       </main>

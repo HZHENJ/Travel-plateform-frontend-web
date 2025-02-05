@@ -3,31 +3,31 @@ const Footer = () => (
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-xl font-semibold mb-4">关于我们</h3>
+            <h3 className="text-xl font-semibold mb-4">About us</h3>
             <p className="text-gray-400">
-              新加坡旅游平台致力于为您提供最佳的新加坡旅行体验。我们提供机票、酒店、景点门票预订等全方位服务。
+              The Singapore Travel Platform is committed to providing you with the best Singapore travel experience. We provide a full range of services such as air tickets, hotels, and attraction ticket bookings.
             </p>
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-4">快速链接</h3>
+            <h3 className="text-xl font-semibold mb-4">Quick links</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">首页</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">机票预订</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">酒店预订</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">景点门票</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">旅游攻略</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Booking Flight</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Booking Hotel</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Attractions</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-white transition duration-300">Travel guide</a></li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-4">联系我们</h3>
+            <h3 className="text-xl font-semibold mb-4">Contact us</h3>
             <ul className="space-y-2 text-gray-400">
-              <li>电话：+65 1234 5678</li>
-              <li>邮箱：info@singaporetravel.com</li>
-              <li>地址：新加坡滨海湾金沙，018956</li>
+              <li>Tel: +65 1234 5678</li>
+              <li>Email: info@singaporetravel.com</li>
+              <li>Address: NUS-ISS</li>
             </ul>
           </div>
           <div>
-            <h3 className="text-xl font-semibold mb-4">关注我们</h3>
+            <h3 className="text-xl font-semibold mb-4">Follow us</h3>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-white transition duration-300">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

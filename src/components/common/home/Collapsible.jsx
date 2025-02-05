@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronUp, ChevronDown } from "./Icons";
+import { ChevronUp, ChevronDown } from "../Icons";
 
 const Collapsible = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(true);

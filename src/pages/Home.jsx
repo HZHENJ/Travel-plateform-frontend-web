@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
-import Carousel from "../components/common/Carousel";
-import Slider from "../components/common/Slider";
-import Collapsible from "../components/common/Collapsible";
-import CollapsibleSidebar from "../components/common/CollapsibleSidebar";
-import FeatureSection from "../components/common/FeatureSection";
-import Newsletter from "../components/layout/Newsletter";
+import Carousel from "../components/common/home/Carousel";
+import Slider from "../components/common/home/Slider";
+import Collapsible from "../components/common/home/Collapsible";
+import CollapsibleSidebar from "../components/common/home/CollapsibleSidebar";
+import FeatureSection from "../components/common/home/FeatureSection";
+import Newsletter from "../components/common/home/Newsletter";
 import Footer from "../components/layout/Footer";
 // import MessageSection from "../components/common/MessageSection";
 

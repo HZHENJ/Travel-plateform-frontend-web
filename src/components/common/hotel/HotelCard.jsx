@@ -30,7 +30,7 @@ const HotelCard = ({ hotel }) => {
             <span className="ml-1">{hotel.rating}</span>
           </div>
           <p className="text-lg font-bold mb-2">{hotel.price}</p>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{hotel.description}</p>
+          {/* <p className="text-sm text-gray-600 mb-2 line-clamp-2">{hotel.description}</p> */}
 
           {/* amenities area */}
           <div className="flex flex-wrap">
@@ -46,4 +46,4 @@ const HotelCard = ({ hotel }) => {
   );
 };
 
-  export default HotelCard;
+export default HotelCard;

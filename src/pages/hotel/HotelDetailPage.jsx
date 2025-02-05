@@ -83,10 +83,10 @@ const HotelDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-100">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-4">
           <button 
             onClick={turnBack}
             className="flex items-center text-blue-600 hover:text-blue-800 mb-4" >
