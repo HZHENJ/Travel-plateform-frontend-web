@@ -90,11 +90,34 @@ const AttractionDetailPage = () => {
 
   console.log("attractionDetail detail:", attractionDetail)
 
+  // UI
   if (!attractionDetail) {
     return <p>Loading ... </p>
   }
 
+  // Can not to move to other positions !!!
   const pricePerPerson = Number.parseInt(attractionDetail.pricing.others.replace(/[^0-9]/g, ""))
+
+  // handle opening hours
+  const weekDaysOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "public_holiday"];
+  const capitalizeFirstLetter = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+  const businessHours = attractionDetail?.businessHour || [];
+
+  const groupedHours = businessHours.reduce((acc, hour) => {
+    if (!acc[hour.day]) {
+      acc[hour.day] = [];
+    }
+    acc[hour.day].push(`${hour.openTime} - ${hour.closeTime}`);
+    return acc;
+  }, {});
+
+  // 按照 weekDaysOrder 排序
+  const sortedBusinessHours = Object.keys(groupedHours)
+  .sort((a, b) => weekDaysOrder.indexOf(a) - weekDaysOrder.indexOf(b))
+  .map((day) => ({
+    day: capitalizeFirstLetter(day),
+    times: groupedHours[day].join(", "),
+  }));
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -139,7 +162,22 @@ const AttractionDetailPage = () => {
             <h2 className="text-xl font-semibold mb-2">Description</h2>
             <div className="text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: attractionDetail.body }}></div>
             <h2 className="text-xl font-semibold mb-2">Opening Hours</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+
+            {
+              sortedBusinessHours.length === 0 ? (
+                <p className="text-gray-500">No Opening Hours Available</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
+                  {sortedBusinessHours.map((hour) => (
+                    <div key={hour.day} className="flex items-center text-gray-700">
+                      <Clock className="w-5 h-5 mr-2" />
+                      <span className="font-semibold">{hour.day}: </span>
+                      <span className="ml-1">{hour.times}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
               {attractionDetail.businessHour.map((hour) => (
                 <div key={hour.sequenceNumber} className="flex items-center text-gray-700">
                   <Clock className="w-5 h-5 mr-2" />
@@ -149,7 +187,7 @@ const AttractionDetailPage = () => {
                   </span>
                 </div>
               ))}
-            </div>
+            </div> */}
             {attractionDetail.businessHourNotes && (
               <p className="text-sm text-gray-600 mb-6">{attractionDetail.businessHourNotes.notes}</p>
             )}
