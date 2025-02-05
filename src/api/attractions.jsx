@@ -3,6 +3,7 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_KEY = import.meta.env.VITE_API_KEY;
 const CONTENT_LANGUAGE = import.meta.env.VITE_CONTENT_LANGUAGE;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // fetch all hotels data from api
 export const fetchAttraction = async (offset = 0, limit = 6) => {
@@ -25,7 +26,7 @@ export const fetchAttraction = async (offset = 0, limit = 6) => {
       console.error("fetchHotels", error);
       throw error;
     }
-  };
+};
 
 // fetch hotel by uuid
 export const fetchAttractoionsByUUID = async(uuid) => {
@@ -47,4 +48,24 @@ export const fetchAttractoionsByUUID = async(uuid) => {
       console.error("fetchHotelsByUUID", error);
       throw error;
     }
-  };
+};
+
+// send transformed attraction data to backend
+export const sendTransformedAttractionDataToBackEnd = async(attractions) => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/attractions/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(attractions),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Data stored:", data);
+  } catch (error) {
+    console.error("Error saving data:", error);
+  }
+};
