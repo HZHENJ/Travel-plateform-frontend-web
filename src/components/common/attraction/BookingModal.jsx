@@ -17,31 +17,81 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
 
   const totalPrice = people * pricePerPerson
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Booking submitted:", { date, time, people, totalPrice })
-    onClose()
-  }
-
+  /** 
+   * 获取所选日期的可用时间 
+   */
   const availableTimes = useMemo(() => {
-    if (!date) return []
-
-    const selectedDay = date.toLocaleDateString("en-US", { weekday: "lowercase" })
-    const businessHour = businessHours.find((bh) => bh.day === selectedDay)
-
-    if (!businessHour) return []
-
-    const times = []
-    const currentTime = new Date(`2000-01-01T${businessHour.openTime}:00`)
-    const closeTime = new Date(`2000-01-01T${businessHour.closeTime}:00`)
-
-    while (currentTime < closeTime) {
-      times.push(currentTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }))
-      currentTime.setMinutes(currentTime.getMinutes() + 30)
+    if (!date || !businessHours) return [];
+  
+    const selectedDay = format(date, "EEEE").toLowerCase();
+  
+    // 获取 `daily` 营业时间 或 具体星期的营业时间
+    let businessHour = businessHours.find((bh) => bh.day === selectedDay) || businessHours.find((bh) => bh.day === "daily");
+  
+    if (!businessHour || !businessHour.openTime || !businessHour.closeTime) return [];
+  
+    const times = [];
+    let now = new Date(); // 当前时间
+    let selectedDate = new Date(date); // 用户选择的日期
+  
+    // 限制 **只能预约未来 15 天**
+    let maxBookingDate = new Date();
+    maxBookingDate.setDate(maxBookingDate.getDate() + 15);
+  
+    if (selectedDate > maxBookingDate) {
+      return []; // 超过 15 天的预约范围，不显示任何时间
     }
+  
+    // 获取营业时间
+    let currentTime = new Date(selectedDate);
+    currentTime.setHours(...businessHour.openTime.split(":"));
+    currentTime.setMinutes(0);
+    currentTime.setSeconds(0);
+  
+    let closeTime = new Date(selectedDate);
+    closeTime.setHours(...businessHour.closeTime.split(":"));
+    closeTime.setMinutes(0);
+    closeTime.setSeconds(0);
+  
+    // 如果用户选择的是今天，跳过当前时间之前的时段
+    if (selectedDate.toDateString() === now.toDateString()) {
+      while (currentTime < closeTime) {
+        if (currentTime > now) {
+          times.push(format(currentTime, "hh:mm a"));
+        }
+        currentTime.setMinutes(currentTime.getMinutes() + 30);
+      }
+    } else {
+      // 如果是未来日期，显示所有时间
+      while (currentTime < closeTime) {
+        times.push(format(currentTime, "hh:mm a"));
+        currentTime.setMinutes(currentTime.getMinutes() + 30);
+      }
+    }
+  
+    return times;
+  }, [date, businessHours]);
 
-    return times
-  }, [date, businessHours])
+  /**
+   * 处理提交预定
+   */
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Booking submitted:", { date, time, people, totalPrice });
+
+    // 关闭模态框并清空数据
+    handleClose();
+  };
+
+  /**
+   * 关闭模态框时清空数据
+   */
+  const handleClose = () => {
+    setDate(null);
+    setTime("");
+    setPeople(1);
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,10 +104,10 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
+
+            {/* 日期选择器 */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">
-                Date
-              </Label>
+              <Label htmlFor="date" className="text-right">Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -74,10 +124,10 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/* 时间选择器 */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="time" className="text-right">
-                Time
-              </Label>
+              <Label htmlFor="time" className="text-right">Time</Label>
               <Select onValueChange={setTime} required>
                 <SelectTrigger className="w-[280px]">
                   <SelectValue placeholder="Select a time">
@@ -88,35 +138,47 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  {availableTimes.map((t) => (
+                  {availableTimes.length > 0 ? (
+                      availableTimes.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem disabled>No available times</SelectItem>
+                    )}
+                  {/* {availableTimes.map((t) => (
                     <SelectItem key={t} value={t}>
                       {t}
                     </SelectItem>
-                  ))}
+                  ))} */}
                 </SelectContent>
               </Select>
             </div>
+
+            {/* 选择人数 */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="people" className="text-right">
-                People
-              </Label>
+              <Label htmlFor="people" className="text-right">People</Label>
               <div className="flex items-center w-[280px]">
                 <UsersIcon className="mr-2 h-4 w-4" />
                 <Input
                   id="people"
                   type="number"
                   value={people}
-                  onChange={(e) => setPeople(Number.parseInt(e.target.value))}
+                  onChange={(e) => setPeople(Math.max(1, Number(e.target.value)))}
                   min={1}
-                  max={50}
+                  max={10}
                   required
                 />
               </div>
             </div>
+
+            {/* 总价 */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Total Price</Label>
               <div className="w-[280px] font-semibold">${totalPrice.toFixed(2)}</div>
             </div>
+
           </div>
           <DialogFooter>
             <Button type="submit">Book Now</Button>
