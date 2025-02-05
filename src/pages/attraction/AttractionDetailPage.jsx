@@ -3,10 +3,11 @@ import { ArrowLeft, ArrowRight, Star, MapPin, Clock, Ticket, Navigation, Mail, G
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 
-import { useNavigate, useParams } from "react-router-dom";
-import { fetchAttractoionsByUUID } from "../../api/attractions";
 import { Button } from "@/components/ui/button"
 import { BookingModal } from "@/components/common/attraction/BookingModal";
+
+import { useNavigate, useParams } from "react-router-dom";
+import { fetchAttractoionsByUUID } from "../../api/attractions";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
