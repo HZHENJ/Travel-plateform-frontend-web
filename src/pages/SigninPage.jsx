@@ -22,7 +22,15 @@ export default function LoginPage() {
         email: form.email,
         password: form.password
       })
+      // console.log(response)
       if (response.status === 200) {
+        const { token, userId, name, role } = response.data;
+        
+        // 存储 Token 和用户信息
+        localStorage.setItem("token", token);
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userRole", role);
+
         addToast('Successfully Login!', 'success', 3000);
         navigate('/');
       }
