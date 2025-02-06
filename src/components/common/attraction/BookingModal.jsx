@@ -1,14 +1,48 @@
 import { useState, useMemo } from "react"
 import { CalendarIcon, ClockIcon, UsersIcon } from "lucide-react"
-import { format } from "date-fns"
+import { addDays, isBefore, isAfter, format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+const calculateWeeklyAvailableTimes = (businessHours) => {
+  const weekDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+  const availableTimesPerDay = {};
+
+  let dailyHours = businessHours.find((bh) => bh.day === "daily");
+
+  weekDays.forEach((day) => {
+    let hours = dailyHours || businessHours.find((bh) => bh.day === day);
+    if (!hours || !hours.openTime || !hours.closeTime) {
+      availableTimesPerDay[day] = []; // 当天不开门
+      return;
+    }
+
+    const times = [];
+    let currentTime = new Date();
+    currentTime.setHours(...hours.openTime.split(":"));
+    currentTime.setMinutes(0);
+    currentTime.setSeconds(0);
+
+    let closeTime = new Date();
+    closeTime.setHours(...hours.closeTime.split(":"));
+    closeTime.setMinutes(0);
+    closeTime.setSeconds(0);
+
+    while (currentTime < closeTime) {
+      times.push(format(currentTime, "hh:mm a"));
+      currentTime.setMinutes(currentTime.getMinutes() + 30);
+    }
+
+    availableTimesPerDay[day] = times;
+  });
+
+  return availableTimesPerDay;
+};
 
 export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours }) {
   const [date, setDate] = useState()
@@ -17,66 +51,28 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
 
   const totalPrice = people * pricePerPerson
 
+  // 预计算每周 `availableTimes`
+  const availableTimesPerDay = useMemo(() => calculateWeeklyAvailableTimes(businessHours), [businessHours]);
+  // console.log("Available Times Per Day:", availableTimesPerDay); // Debug 日志
+
   /** 
    * 获取所选日期的可用时间 
    */
   const availableTimes = useMemo(() => {
-    if (!date || !businessHours) return [];
+    if (!date) return [];
+    let today = format(date, "EEEE").toLowerCase();
+    return availableTimesPerDay[today] || [];
+  }, [date, availableTimesPerDay]);
   
-    const selectedDay = format(date, "EEEE").toLowerCase();
-  
-    // 获取 `daily` 营业时间 或 具体星期的营业时间
-    let businessHour = businessHours.find((bh) => bh.day === selectedDay) || businessHours.find((bh) => bh.day === "daily");
-  
-    if (!businessHour || !businessHour.openTime || !businessHour.closeTime) return [];
-  
-    const times = [];
-    let now = new Date(); // 当前时间
-    let selectedDate = new Date(date); // 用户选择的日期
-  
-    // 限制 **只能预约未来 15 天**
-    let maxBookingDate = new Date();
-    maxBookingDate.setDate(maxBookingDate.getDate() + 15);
-  
-    if (selectedDate > maxBookingDate) {
-      return []; // 超过 15 天的预约范围，不显示任何时间
-    }
-  
-    // 获取营业时间
-    let currentTime = new Date(selectedDate);
-    currentTime.setHours(...businessHour.openTime.split(":"));
-    currentTime.setMinutes(0);
-    currentTime.setSeconds(0);
-  
-    let closeTime = new Date(selectedDate);
-    closeTime.setHours(...businessHour.closeTime.split(":"));
-    closeTime.setMinutes(0);
-    closeTime.setSeconds(0);
-  
-    // 如果用户选择的是今天，跳过当前时间之前的时段
-    if (selectedDate.toDateString() === now.toDateString()) {
-      while (currentTime < closeTime) {
-        if (currentTime > now) {
-          times.push(format(currentTime, "hh:mm a"));
-        }
-        currentTime.setMinutes(currentTime.getMinutes() + 30);
-      }
-    } else {
-      // 如果是未来日期，显示所有时间
-      while (currentTime < closeTime) {
-        times.push(format(currentTime, "hh:mm a"));
-        currentTime.setMinutes(currentTime.getMinutes() + 30);
-      }
-    }
-  
-    return times;
-  }, [date, businessHours]);
-
   /**
    * 处理提交预定
    */
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!date || !time) {
+      alert("Please select a date and time before booking.");
+      return;
+    }
     console.log("Booking submitted:", { date, time, people, totalPrice });
 
     // 关闭模态框并清空数据
@@ -95,7 +91,7 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
           <DialogTitle>Book Your Adventure</DialogTitle>
           <DialogDescription>
@@ -103,26 +99,33 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
 
             {/* 日期选择器 */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="date" className="text-right">Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    id="date"
-                    variant={"outline"}
-                    className={cn("w-[280px] justify-start text-left font-normal", !date && "text-muted-foreground")}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-                </PopoverContent>
-              </Popover>
+            <div className="flex justify-center items-center w-full">
+              <div className="w-full max-w-sm flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(selectedDate) => {
+                    // console.log("Selected date:", selectedDate); // Debug 日志
+                    setDate(selectedDate); // 更新状态
+                  }}
+                  disabled={(day) => {
+                    const today = new Date(); // 获取选中的星期几
+                    const selectedDay = format(day, "EEEE").toLowerCase(); // 获取选中的星期几
+                    const maxBookingDate = addDays(new Date(), 30); // 限制预约 15 天
+
+                    return (
+                      isBefore(day, today) ||
+                      isAfter(day, maxBookingDate) || 
+                      availableTimesPerDay[today]?.length === 0 ||  // 超过 15 天 或 当天不开门
+                      availableTimesPerDay[selectedDay]?.length === 0
+                    );
+                  }}
+                  initialFocus
+                />
+              </div>
             </div>
 
             {/* 时间选择器 */}
@@ -132,26 +135,20 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
                 <SelectTrigger className="w-[280px]">
                   <SelectValue placeholder="Select a time">
                     <div className="flex items-center">
-                      <ClockIcon className="mr-2 h-4 w-4" />
                       <span>{time || "Select a time"}</span>
                     </div>
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {availableTimes.length > 0 ? (
-                      availableTimes.map((t) => (
-                        <SelectItem key={t} value={t}>
-                          {t}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem disabled>No available times</SelectItem>
-                    )}
-                  {/* {availableTimes.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t}
-                    </SelectItem>
-                  ))} */}
+                    availableTimes.map((t, index) => (
+                      <SelectItem key={`time-${index}`} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem disabled>No available times</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -160,7 +157,6 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="people" className="text-right">People</Label>
               <div className="flex items-center w-[280px]">
-                <UsersIcon className="mr-2 h-4 w-4" />
                 <Input
                   id="people"
                   type="number"

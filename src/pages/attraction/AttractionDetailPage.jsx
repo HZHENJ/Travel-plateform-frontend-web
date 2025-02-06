@@ -88,7 +88,7 @@ const AttractionDetailPage = () => {
     getData();
   }, [uuid]);
 
-  console.log("attractionDetail detail:", attractionDetail)
+  // console.log("attractionDetail detail:", attractionDetail)
 
   // UI
   if (!attractionDetail) {
