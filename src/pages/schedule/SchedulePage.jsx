@@ -176,7 +176,7 @@ return (
                                 <Card key={event.id} className="p-4">
                                     <div className="flex items-center space-x-4">
                                         <img src={event.image || "/placeholder.svg"} alt={event.title} className="w-20 h-20 rounded-lg" />
-                                        <div className="flex-grow"> {/* ✅ 让文本内容自动填充剩余空间 */}
+                                        <div className="flex-grow"> {/* 让文本内容自动填充剩余空间 */}
                                         <h3 className="font-semibold">{event.title}</h3>
                                         <p className="text-sm text-muted-foreground">
                                             {format(event.date, "MMMM d, yyyy")} at {event.time}
@@ -184,7 +184,7 @@ return (
                                         <p className="text-sm">{event.description}</p>
                                         <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
                                         </div>
-                                        {/* ✅ 让按钮靠右 */}
+                                        {/* 让按钮靠右 */}
                                         <div className="flex justify-end">
                                         <Button 
                                         variant="outline" 
