@@ -69,3 +69,29 @@ export const sendTransformedAttractionDataToBackEnd = async(attractions) => {
     console.error("Error saving data:", error);
   }
 };
+
+// post attraction data to back end
+// {
+//   "userId": 123, 
+//   "attractionId": 456, 
+//   "visitDate": "2025-02-07", 
+//   "ticketType": "Standard", 
+//   "numberOfTickets": 2
+// }
+export const sendAttractionBookingToBackEnd = async(attracionBooking) => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/attractions/booking`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(attracionBooking)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`)
+    }
+    const data = await response.json();
+    console.log("Booking Result", data);
+  } catch (error) {
+    console.error("Error Booking Attracion:", error);
+  }
+}
