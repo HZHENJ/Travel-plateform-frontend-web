@@ -75,23 +75,15 @@ export const sendTransformedAttractionDataToBackEnd = async(attractions) => {
 //   "userId": 123, 
 //   "attractionId": 456, 
 //   "visitDate": "2025-02-07", 
-//   "ticketType": "Standard", 
 //   "numberOfTickets": 2
 // }
-export const sendAttractionBookingToBackEnd = async(attracionBooking) => {
+export const sendAttractionBookingToBackEnd = async (attractionBooking) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/attractions/booking`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(attracionBooking)
+    const response = await axios.post(`${BACKEND_URL}/api/attractions/booking`, attractionBooking, {
+      headers: { "Content-Type": "application/json" }
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`)
-    }
-    const data = await response.json();
-    console.log("Booking Result", data);
+    return response
   } catch (error) {
-    console.error("Error Booking Attracion:", error);
+    console.error("Error Booking Attraction:", error.response ? error.response.data : error.message);
   }
-}
+};

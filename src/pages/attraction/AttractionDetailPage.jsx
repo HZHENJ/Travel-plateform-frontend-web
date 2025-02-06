@@ -278,6 +278,7 @@ const AttractionDetailPage = () => {
         onClose={closeBookingModal}
         pricePerPerson={pricePerPerson}
         businessHours={attractionDetail.businessHour}
+        uuid={attractionDetail.uuid}
       />
     </div>
   )

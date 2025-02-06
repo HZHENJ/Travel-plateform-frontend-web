@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react"
-import { addDays, isBefore, isAfter, format } from "date-fns"
+import { parse, addDays, isBefore, isAfter, format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { sendAttractionBookingToBackEnd } from "../../../api/attractions"
+import { useToast } from '../../../components/common/MessageBox'
 
 const calculateWeeklyAvailableTimes = (businessHours) => {
   const weekDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
@@ -42,10 +44,26 @@ const calculateWeeklyAvailableTimes = (businessHours) => {
   return availableTimesPerDay;
 };
 
-export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours }) {
+// 解析时间，并转换成 LocalDateTime 兼容格式
+const convertToLocalDateTime = (date, timeString) => {
+  if (!date || !timeString) return null;
+
+  // 解析时间字符串 ("11:00 AM" => Date 对象)
+  const parsedTime = parse(timeString, "hh:mm a", new Date());
+
+  // 组合 `date` 和 `parsedTime`
+  const visitDateTime = new Date(date);
+  visitDateTime.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
+
+  // 转换为 ISO 8601 格式
+  return visitDateTime.toISOString();
+};
+
+export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours, uuid}) {
   const [date, setDate] = useState()
   const [time, setTime] = useState("")
   const [people, setPeople] = useState(1)
+  const { addToast } = useToast();
 
   const totalPrice = people * pricePerPerson
 
@@ -65,16 +83,32 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours })
   /**
    * 处理提交预定
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!date || !time) {
       alert("Please select a date and time before booking.");
       return;
     }
-    console.log("Booking submitted:", { date, time, people, totalPrice });
 
-    // 关闭模态框并清空数据
-    handleClose();
+    const data = {
+      userId: parseInt(localStorage.getItem("userId"), 10),
+      uuid: uuid,
+      visitDate: format(date, "yyyy-MM-dd"),
+      visitTime: convertToLocalDateTime(date, time),
+      numberOfTickets: people,
+      price: 0
+    }
+    // console.log("Booking submitted:", data);
+    try {
+      const response = await sendAttractionBookingToBackEnd(data);
+      if (response.status === 200){
+        console.log(response)
+        handleClose(); // 关闭模态框并清空数据
+        addToast("Booking Successful!", "success", 3000)
+      }
+    } catch (error) {
+      console.log("Error", error)
+    }
   };
 
   /**
