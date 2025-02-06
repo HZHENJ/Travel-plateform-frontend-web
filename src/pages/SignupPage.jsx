@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 import { useToast } from '../components/common/MessageBox'
 import { register } from '../api/user'

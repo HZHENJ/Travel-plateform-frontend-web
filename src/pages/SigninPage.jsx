@@ -1,34 +1,31 @@
-// Author
-// HUANG ZHENJIA A0298312B
-
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../components/common/MessageBox'
+import { login } from '../api/user'
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ username: '', password: '' });
-  const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
   const { addToast } = useToast();
+  
+  const navigate = useNavigate();
 
+  // 
   const handleSubmit = async (e) => {
     e.preventDefault();
     // validation input
-    if (form.username.trim() === '' || form.password.trim() === '') {
+    if (form.email.trim() === '' || form.password.trim() === '') {
       addToast("Username or Password can not be empty!", "error", 3000)
       return;
     }
     try {
-      const response = await axios.post('/users/login', { username: form.username, password: form.password}, { withCredentials: true });
-      if (response.data.statusCode === 200) {
-        addToast(response.data.message, "success", 3000);
-        const role = response.data.data.role;
-        if (role === 'USER'){
-          navigate('/gallery');
-        } else if (role === 'ADMIN') {
-          navigate('/admin/products');
-        }
-      } 
+      const response = await login({
+        email: form.email,
+        password: form.password
+      })
+      if (response.status === 200) {
+        addToast('Successfully Login!', 'success', 3000);
+        navigate('/');
+      }
     } catch (error) {
       addToast("Login Failure", "error", 3000)
     }
@@ -88,14 +85,14 @@ export default function LoginPage() {
                   Username
                 </label>
                 <input
-                  id="username"
-                  name="username"
+                  id="email"
+                  name="email"
                   type="text"
-                  autoComplete="username"
+                  autoComplete="email"
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Username"
-                  value={form.username}
-                  onChange={(e) => setForm({ ...form, username: e.target.value })}
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
               </div>
               <div>
