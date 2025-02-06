@@ -1,25 +1,24 @@
-// Author
-// HUANG ZHENJIA A0298312B
-
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
 import { useToast } from '../components/common/MessageBox'
+import { register } from '../api/user'
 
 export default function SignupPage() {
   const [form, setForm] = useState({
-    username: '',
     email: '',
     password: '',
     confirmPassword: '',
   })
+
   const [errorMessage, setErrorMessage] = useState('')
-  const navigate = useNavigate()
   const { addToast } = useToast();
+
+  const navigate = useNavigate()
 
   // validate part
   const validateForm = () => {
-    if (!form.username || !form.email || !form.password || !form.confirmPassword) {
+    if (!form.email || !form.password || !form.confirmPassword) {
       setErrorMessage('All fields are required')
       return false
     }
@@ -32,13 +31,6 @@ export default function SignupPage() {
       // addToast('Please enter a valid email address', 'error', 3000)
       return false
     }
-
-    // to validate the phone number
-    // const phoneRegex = /^[0-9]{8,11}$/
-    // if (!phoneRegex.test(form.phone)) {
-    //   setErrorMessage('Please enter a valid phone number with 8 to 11 digits')
-    //   return false
-    // }
 
     // to validate the phone number, whether if password same with the comfirmpassword
     if (form.password !== form.confirmPassword) {
@@ -57,12 +49,11 @@ export default function SignupPage() {
       return
     }
     try {
-      const response = await axios.post('/users/register', {
-        username: form.username,
+      const response = await register({
         email: form.email,
         password: form.password,
       })
-      if (response.data.statusCode === 200) {
+      if (response.status === 200) {
         addToast('Successfully register!', 'success', 3000);
         navigate('/signin');
       }
@@ -133,17 +124,6 @@ export default function SignupPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-              <input
-                id="username"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your username"
-                value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
-                required
-              />
-            </div>
-            <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
                 id="email"
@@ -155,17 +135,6 @@ export default function SignupPage() {
                 required
               />
             </div>
-            {/* <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input
-                id="phone"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter your phone number"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                required
-              />
-            </div> */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <input
