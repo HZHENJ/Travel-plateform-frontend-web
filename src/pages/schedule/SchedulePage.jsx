@@ -1,46 +1,94 @@
-import { useState } from "react"
-import { format, startOfWeek, addDays, isSameDay } from "date-fns"
+import { useState, useEffect } from "react"
+import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns"
 import { Calendar } from "../../components/ui/calendar"
 import { Button } from "../../components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/ui/dialog";
+import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge"
-import { PlusCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star } from "lucide-react"
+import { fetchUserSchedule } from "../../api/schedule"
+
+import { checkUserReview, submitReview } from "../../api/review"
 
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
   
 const SchedulePage = () => {
 const [selectedDate, setSelectedDate] = useState(new Date())
+const [selectedEvent, setSelectedEvent] = useState(null);
+const [reviewedItems, setReviewedItems] = useState({});
 const [events, setEvents] = useState([])
+
+const [reviewModal, setReviewModal] = useState(false);
+const [reviewText, setReviewText] = useState("");
+const [rating, setRating] = useState(5); // 默认评分
 
 const startOfCurrentWeek = startOfWeek(selectedDate, { weekStartsOn: 1 })
 const weekDays = [...Array(7)].map((_, index) => addDays(startOfCurrentWeek, index))
 
 const userId = parseInt(localStorage.getItem("userId"), 10);
 
+// 打开评分弹窗
+const openReviewModal = (event) => {
+    setSelectedEvent(event);
+    setReviewText("");
+    setRating(5);
+    setReviewModal(true);
+};
+
+// 提交评分
+const handleReviewSubmit = async () => {
+    if (!reviewText.trim()) return alert("Please enter a review.");
+
+    try {
+        const reviewData = {
+            userId,
+            itemType: "Attraction",
+            itemId: selectedEvent.id, // AttractionBooking ID
+            rating,
+            comment: reviewText
+        };
+        console.log(reviewData)
+
+        await submitReview(reviewData);
+        setReviewModal(false);
+        alert("Review submitted successfully!");
+    } catch (error) {
+        alert("Failed to submit review.");
+    }
+};
+
 // 获取后端数据
 useEffect(() => {
 const loadSchedule = async () => {
     const bookings = await fetchUserSchedule(userId);
-
-    // **转换 API 数据**
     const transformedEvents = bookings.map((booking) => ({
-    id: booking.attractionBookingId,
-    date: parseISO(booking.visitDate),  // ✅ 确保格式是 `Date`
-    time: format(parseISO(booking.visitTime), "hh:mm a"), // ✅ 解析时间
-    title: `Visit ${booking.attractionUuid}`, // ✅ 显示 UUID
-    description: `Booking ID: ${booking.bookingId}`,
-    image: "/placeholder.svg", // 你可以替换成真实图片
-    category: "attraction", // 统一分类
+        id: booking.attractionBookingId,
+        date: parseISO(booking.visitDate),
+        time: format(parseISO(booking.visitTime), "hh:mm a"),
+        title: `Visit ${booking.uuid}`,
+        description: `Booking ID: ${booking.bookingId}`,
+        image: "/placeholder.svg",
+        category: "attraction",
     }));
 
-    setEvents(transformedEvents); // ✅ 更新状态
+    setEvents(transformedEvents);
 };
+
+const checkReviews = async () => {
+    const reviewStatus = {};
+    for (const event of events) {
+      reviewStatus[event.id] = await checkUserReview(userId, event.id);
+    }
+    setReviewedItems(reviewStatus);
+  };
 
 if (userId) {
     loadSchedule();
+    checkReviews();
 }
-}, [userId]);
+}, [userId, events]);
 
 const handlePreviousWeek = () => {
     setSelectedDate(addDays(selectedDate, -7))
@@ -117,34 +165,79 @@ return (
 
             <div className="flex space-x-4">
                 <div className="w-2/3">
-                <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
-                <div className="space-y-4">
-                    {events
-                    .filter((event) => event.date >= new Date())
-                    .sort((a, b) => a.date - b.date)
-                    .slice(0, 5)
-                    .map((event) => (
-                        <Card key={event.id} className="p-4">
-                        <div className="flex items-center space-x-4">
-                            <img src={event.image || "/placeholder.svg"} alt={event.title} className="w-20 h-20 rounded-lg" />
-                            <div>
-                            <h3 className="font-semibold">{event.title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                                {format(event.date, "MMMM d, yyyy")} at {event.time}
-                            </p>
-                            <p className="text-sm">{event.description}</p>
-                            <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
-                            </div>
-                        </div>
-                        </Card>
-                    ))}
-                </div>
+                    <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
+                    <div className="space-y-4">
+                        {
+                            events
+                            .filter((event) => event.date >= new Date())
+                            .sort((a, b) => a.date - b.date)
+                            .slice(0, 3)
+                            .map((event) => (
+                                <Card key={event.id} className="p-4">
+                                    <div className="flex items-center space-x-4">
+                                        <img src={event.image || "/placeholder.svg"} alt={event.title} className="w-20 h-20 rounded-lg" />
+                                        <div className="flex-grow"> {/* ✅ 让文本内容自动填充剩余空间 */}
+                                        <h3 className="font-semibold">{event.title}</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            {format(event.date, "MMMM d, yyyy")} at {event.time}
+                                        </p>
+                                        <p className="text-sm">{event.description}</p>
+                                        <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
+                                        </div>
+                                        {/* ✅ 让按钮靠右 */}
+                                        <div className="flex justify-end">
+                                        <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => openReviewModal(event)}
+                                        disabled={reviewedItems[event.id]}
+                                        className="ml-auto"
+                                        >
+                                        {reviewedItems[event.id] ? "Reviewed" : <><Star className="h-4 w-4 text-yellow-500" /> Rate</>}
+                                        </Button>
+                                        </div>
+                                    </div>
+                                </Card>
+                                ))}
+
+                        {/* 评分弹窗 */}
+                        {
+                            reviewModal && (
+                            <Dialog open={reviewModal} onOpenChange={setReviewModal}>
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                <DialogTitle>Rate Your Experience</DialogTitle>
+                                </DialogHeader>
+                                <div className="flex justify-center space-x-2">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                    key={star}
+                                    className={`h-6 w-6 cursor-pointer ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
+                                    onClick={() => setRating(star)}
+                                    />
+                                ))}
+                                </div>
+                                <Textarea
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                                placeholder="Share your experience..."
+                                className="w-full p-2 border rounded"
+                                />
+                                <DialogFooter>
+                                <Button onClick={handleReviewSubmit}>Submit</Button>
+                                <Button variant="secondary" onClick={() => setReviewModal(false)}>
+                                    Cancel
+                                </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                            </Dialog>
+                        )}
+                    </div>
                 </div>
                 <div className="w-1/3">
                 <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border" />
                 </div>
             </div>
-
         </main>
         <Footer/>
     </div>
