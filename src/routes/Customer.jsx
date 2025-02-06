@@ -6,8 +6,9 @@ import SignupPage from "../pages/SignupPage"
 import HotelPage from "../pages/hotel/HotelPage";
 import HotelDetailPage from "../pages/hotel/HotelDetailPage";
 import AttractionDetailPage from "../pages/attraction/AttractionDetailPage";
-
 import AttractionPage from "../pages/attraction/AttractionPage"
+import SchedulePage from "../pages/schedule/SchedulePage";
+
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,9 @@ const AppRoutes = () => {
           {/* Attraction Router */}
           <Route path="/attractions" element={<AttractionPage />}/>
           <Route path="/attractions/:uuid" element={<AttractionDetailPage />}/>
+
+          {/* schedule */}
+          <Route path="/schedule" element={<SchedulePage />}/>
         </Routes>
       </Router>
     </ToastProvider>

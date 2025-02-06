@@ -39,9 +39,9 @@ export default function Navbar () {
           <Link to="/attractions" className="hover:text-blue-200 transition duration-300">
             Atrractions
           </Link>
-          <a href="#" className="hover:text-blue-200 transition duration-300">
+          <Link to="/schedule" className="hover:text-blue-200 transition duration-300">
             Schedule
-          </a>
+          </Link>
         </div>
 
         {/* 根据 `isLoggedIn` 状态显示不同按钮 */}
