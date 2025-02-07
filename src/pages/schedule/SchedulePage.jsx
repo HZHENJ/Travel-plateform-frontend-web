@@ -171,7 +171,7 @@ return (
                             events
                             .filter((event) => event.date >= new Date())
                             .sort((a, b) => a.date - b.date)
-                            .slice(0, 3)
+                            .slice(0, 6)
                             .map((event) => (
                                 <Card key={event.id} className="p-4">
                                     <div className="flex items-center space-x-4">

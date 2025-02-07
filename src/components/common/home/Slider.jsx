@@ -4,6 +4,8 @@ import RecommendationCard from "./RecommendationCard";
 const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  console.log(items)
+
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % (items.length - visibleItems + 1));
   };
@@ -13,6 +15,7 @@ const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
       (prevIndex) => (prevIndex - 1 + (items.length - visibleItems + 1)) % (items.length - visibleItems + 1)
     );
   };
+  
 
   return (
     <div className="my-8">
@@ -32,7 +35,7 @@ const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
                   padding: isSidebarOpen ? "0 1rem" : "0 0.5rem",
                 }}
               >
-                <RecommendationCard {...item} />
+                <RecommendationCard item={item}/>
               </div>
             ))}
           </div>
@@ -52,6 +55,8 @@ const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
       </div>
     </div>
   );
+  
+
 };
 
 export default Slider;
