@@ -14,6 +14,7 @@ import { checkUserReview, submitReview } from "../../api/review"
 
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
+import Pagination from "../../components/common/Pagination"
 import { fetchAttractoionsByUUID } from "../../api/attractions"
   
 const SchedulePage = () => {
@@ -26,10 +27,71 @@ const SchedulePage = () => {
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(5); // 默认评分
 
+    const [currentPage, setCurrentPage] = useState(1); // 分页页码
+    const eventsPerPage = 2; // 每页显示 2 个事件
+
     const startOfCurrentWeek = startOfWeek(selectedDate, { weekStartsOn: 1 })
     const weekDays = [...Array(7)].map((_, index) => addDays(startOfCurrentWeek, index))
 
     const userId = parseInt(localStorage.getItem("userId"), 10);
+
+    // 获取后端数据
+    useEffect(() => {
+        const loadSchedule = async () => {
+            const bookings = await fetchUserSchedule(userId);
+            // 提取所有 attractionUuid 并存入数组
+            const attractionUuids = bookings.map(booking => booking.attractionUuid);
+            const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
+            // 创建一个 `uuid` 到 `attraction` 的映射
+            const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
+
+            // console.log(attractionMap)
+            const transformedEvents = bookings.map((booking) => ({
+                id: booking.attractionBookingId,
+                date: parseISO(booking.visitDate),
+                time: format(parseISO(booking.visitTime), "hh:mm a"),
+                title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
+                // description: `Booking ID: ${booking.bookingId}`,
+                image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
+                category: "attraction",
+            }));
+            console.log(transformedEvents)
+            setEvents(transformedEvents);
+        };
+        // 
+        const checkReviews = async () => {
+            const reviewStatus = {};
+            for (const event of events) {
+                reviewStatus[event.id] = await checkUserReview(userId, event.id);
+            }
+            setReviewedItems(reviewStatus);
+        };
+
+        // 判断用户
+        if (userId) {
+            loadSchedule();
+            checkReviews();
+        }
+    }, [userId, events]);
+
+    // 计算当天事件
+    const todayEvents = events.filter(event => isSameDay(event.date, selectedDate));
+
+    // 计算即将到来的事件 并排序
+    const upcomingEvents = events.filter(event => event.date >= new Date()).sort((a, b) => a.date - b.date);
+
+    // 选择渲染的事件列表
+    const displayEvents = todayEvents.length > 0 ? todayEvents : upcomingEvents;
+
+    // 计算分页索引
+    const totalPages = Math.ceil(displayEvents.length / eventsPerPage);
+    const startIndex = (currentPage - 1) * eventsPerPage;
+    const endIndex = startIndex + eventsPerPage;
+    const paginatedEvents = displayEvents.slice(startIndex, endIndex);
+
+    // 确定标题文本
+    const titleText = todayEvents.length > 0 ? `Events on ${format(selectedDate, "MMMM d, yyyy")}` 
+        : upcomingEvents.length > 0 ? "Upcoming Events" : "No Events Available";
 
     // 打开评分弹窗
     const openReviewModal = (event) => {
@@ -60,57 +122,21 @@ const SchedulePage = () => {
             alert("Failed to submit review.");
         }
     };
-
-    // 获取后端数据
-    useEffect(() => {
-        const loadSchedule = async () => {
-            const bookings = await fetchUserSchedule(userId);
-            // 提取所有 attractionUuid 并存入数组
-            const attractionUuids = bookings.map(booking => booking.attractionUuid);
-            const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
-            // 创建一个 `uuid` 到 `attraction` 的映射
-            const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
-
-            // console.log(attractionMap)
-            const transformedEvents = bookings.map((booking) => ({
-                id: booking.attractionBookingId,
-                date: parseISO(booking.visitDate),
-                time: format(parseISO(booking.visitTime), "hh:mm a"),
-                title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
-                description: `Booking ID: ${booking.bookingId}`,
-                image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
-                category: "attraction",
-            }));
-            console.log(transformedEvents)
-            setEvents(transformedEvents);
-        };
-        // 
-        const checkReviews = async () => {
-            const reviewStatus = {};
-            for (const event of events) {
-                reviewStatus[event.id] = await checkUserReview(userId, event.id);
-            }
-            setReviewedItems(reviewStatus);
-        };
-
-        if (userId) {
-            loadSchedule();
-            checkReviews();
-        }
-        }, [userId]
-    );
-
+    
+    // 上个星期
     const handlePreviousWeek = () => {
         setSelectedDate(addDays(selectedDate, -7))
     }
 
+    // 下个星期
     const handleNextWeek = () => {
         setSelectedDate(addDays(selectedDate, 7))
     }
 
+    // 设置类别颜色
     const getCategoryColor = (category) => {
         switch (category) {
-        case "work":
+        case "attraction":
             return "bg-blue-100 text-blue-800"
         case "personal":
             return "bg-green-100 text-green-800"
@@ -159,14 +185,13 @@ const SchedulePage = () => {
                                 <CardContent className="p-0">
                                     {dayEvents.slice(0, maxEventsToShow).map((event) => (
                                         <div key={event.id} className="mb-2 last:mb-0">
-                                            <Badge variant="secondary" className={`mb-1 block ${getCategoryColor(event.category)}`}>
-                                                {event.time}
-                                            </Badge>
+                                            {/* <Badge variant="secondary" className={`mb-1 block ${getCategoryColor(event.category)}`}>{event.time}</Badge> */}
                                             <div className="flex items-center space-x-2">
                                                 <MediaImage uuid={event.image} fileType={"Small Thumbnail"} className="w-8 h-8 rounded-full" />
                                                 <div className="overflow-hidden">
-                                                    <p className="text-sm font-medium truncate w-[120px]">{event.title}</p>
-                                                    <p className="text-xs text-muted-foreground line-clamp-2 w-[140px]">{event.description}</p>
+                                                    <p className="text-sm font-medium truncate w-[90px]">{event.title}</p>
+                                                    <Badge variant="secondary" className={`mb-1 block ${getCategoryColor(event.category)}`}>{event.time}</Badge>
+                                                    {/* <p className="text-xs text-muted-foreground line-clamp-2 w-[140px]">{event.description}</p> */}
                                                 </div>
                                             </div>
                                         </div>
@@ -190,10 +215,7 @@ const SchedulePage = () => {
                             // 计算当天事件
                             const todayEvents = events.filter(event => isSameDay(event.date, selectedDate));
                             // 计算即将到来的事件（只取最近 2 个）
-                            const upcomingEvents = events
-                                .filter(event => event.date >= new Date())
-                                .sort((a, b) => a.date - b.date)
-                                .slice(0, 2);
+                            const upcomingEvents = events.filter(event => event.date >= new Date()).sort((a, b) => a.date - b.date).slice(0, 2);
                             
                             // 确定标题文本
                             const titleText = todayEvents.length > 0 
@@ -267,6 +289,11 @@ const SchedulePage = () => {
                                             </Dialog>
                                         )}
                                     </div>
+
+                                    {/* 分页组件 */}
+                                    {totalPages > 1 && (
+                                        <Pagination totalPages={totalPages}currentPage={currentPage} onPageChange={setCurrentPage}/>
+                                    )}
                                 </>
                             );
                         })()}

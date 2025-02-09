@@ -96,7 +96,7 @@ const AttractionDetailPage = () => {
   }
 
   // Can not to move to other positions !!!
-  const pricePerPerson = Number.parseInt(attractionDetail.pricing.others.replace(/[^0-9]/g, ""))
+  const pricePerPerson = parseFloat(attractionDetail.pricing.others.replace(/[^0-9.]/g, ""));
 
   // handle opening hours
   const weekDaysOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "public_holiday"];
@@ -112,8 +112,7 @@ const AttractionDetailPage = () => {
   }, {});
 
   // 按照 weekDaysOrder 排序
-  const sortedBusinessHours = Object.keys(groupedHours)
-  .sort((a, b) => weekDaysOrder.indexOf(a) - weekDaysOrder.indexOf(b))
+  const sortedBusinessHours = Object.keys(groupedHours).sort((a, b) => weekDaysOrder.indexOf(a) - weekDaysOrder.indexOf(b))
   .map((day) => ({
     day: capitalizeFirstLetter(day),
     times: groupedHours[day].join(", "),
