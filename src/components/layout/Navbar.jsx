@@ -30,9 +30,9 @@ export default function Navbar () {
           <Link to="/" className="hover:text-blue-200 transition duration-300">
             Home
           </Link>
-          <a href="#" className="hover:text-blue-200 transition duration-300">
+          <Link to="/flight" className="hover:text-blue-200 transition duration-300">
             Flight
-          </a>
+          </Link>
           <Link to="/hotels" className="hover:text-blue-200 transition duration-300">
             Hotels
           </Link>
