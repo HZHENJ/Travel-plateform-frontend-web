@@ -10,8 +10,6 @@ const MediaImage = ({uuid, fileType, altText, className="w-full h-auto object-co
         src={imageUrl}
         alt={altText || "Media Image"}
         onError={(e) => { e.target.src = '/images/404.jpg'; }}
-        // style={{ width: `${width}px`, height: `${height}px` }}
-        // className="w-full h-auto object-cover"
         className={className}
         loading="lazy"
       />
