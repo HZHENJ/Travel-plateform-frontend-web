@@ -2,13 +2,8 @@ import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import Carousel from "../components/common/home/Carousel";
 import Slider from "../components/common/home/Slider";
-import Collapsible from "../components/common/home/Collapsible";
-import CollapsibleSidebar from "../components/common/home/CollapsibleSidebar";
-import FeatureSection from "../components/common/home/FeatureSection";
-import Newsletter from "../components/common/home/Newsletter";
 import Footer from "../components/layout/Footer";
 import { fetchPersonalizedRecommendations } from "../api/recommendations"
-// import MessageSection from "../components/common/MessageSection";
 
 const Home = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

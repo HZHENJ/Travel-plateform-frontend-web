@@ -8,6 +8,7 @@ import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { fetchUserSchedule } from "../../api/schedule"
+import MediaImage from "../../components/common/media/MediaImage";
 
 import { checkUserReview, submitReview } from "../../api/review"
 
@@ -67,17 +68,20 @@ const SchedulePage = () => {
             // 提取所有 attractionUuid 并存入数组
             const attractionUuids = bookings.map(booking => booking.attractionUuid);
             const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
-            // console.log(attractionDetails)
+            // 创建一个 `uuid` 到 `attraction` 的映射
+            const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
+
+            // console.log(attractionMap)
             const transformedEvents = bookings.map((booking) => ({
                 id: booking.attractionBookingId,
                 date: parseISO(booking.visitDate),
                 time: format(parseISO(booking.visitTime), "hh:mm a"),
-                title: `Visit ${booking.uuid}`,
+                title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
                 description: `Booking ID: ${booking.bookingId}`,
-                image: "/placeholder.svg",
+                image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
                 category: "attraction",
             }));
-
+            console.log(transformedEvents)
             setEvents(transformedEvents);
         };
         // 
@@ -121,7 +125,7 @@ const SchedulePage = () => {
         <div className="min-h-screen flex flex-col">
             <Navbar />
             <main className="flex-grow container mx-auto px-4 py-8">
-                {/*  */}
+                {/* calendar */}
                 <div className="flex justify-between items-center mb-6">
                     {/* <h3 className="text-3xl font-bold">My Schedule</h3> */}
                     <div className="flex items-center space-x-4">
@@ -137,114 +141,141 @@ const SchedulePage = () => {
                     </div>
                 </div>
 
-                {/*  */}
+                {/* card */}
                 <div className="grid grid-cols-7 gap-4 mb-8">
-                    {weekDays.map((day) => (
-                    <Card key={day.toString()} className="p-4">
-                        <CardHeader className="p-0 mb-2">
-                            <CardTitle className="text-sm font-medium">{format(day, "EEE")}</CardTitle>
-                            <p className="text-xs text-muted-foreground">{format(day, "MMM d")}</p>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            {events
-                                .filter((event) => isSameDay(event.date, day))
-                                .map((event) => (
-                                <div key={event.id} className="mb-2 last:mb-0">
-                                    <Badge variant="secondary" className={`mb-1 block ${getCategoryColor(event.category)}`}>
-                                    {event.time}
-                                    </Badge>
-                                    <div className="flex items-center space-x-2">
-                                    <img
-                                        src={event.image || "/placeholder.svg"}
-                                        alt={event.title}
-                                        className="w-10 h-10 rounded-full"
-                                    />
-                                    <div>
-                                        <p className="text-sm font-medium">{event.title}</p>
-                                        <p className="text-xs text-muted-foreground">{event.description}</p>
-                                    </div>
-                                    </div>
-                                </div>
-                                ))}
-                        </CardContent>
-                    </Card>
-                    ))}
+                    {
+                        weekDays.map((day) => {
+                            const dayEvents = events.filter((event) => isSameDay(event.date, day));
+                            const maxEventsToShow = 2; // 最多显示 2 个事件
+                            const hasMore = dayEvents.length > maxEventsToShow; // 是否有更多事件
+
+                            return (
+                            <Card key={day.toString()} className="p-4 min-h-[150px] max-h-[200px] overflow-hidden">
+                                <CardHeader className="p-0 mb-2">
+                                    <CardTitle className="text-sm font-medium">{format(day, "EEE")}</CardTitle>
+                                    <p className="text-xs text-muted-foreground">{format(day, "MMM d")}</p>
+                                </CardHeader>
+
+                                <CardContent className="p-0">
+                                    {dayEvents.slice(0, maxEventsToShow).map((event) => (
+                                        <div key={event.id} className="mb-2 last:mb-0">
+                                            <Badge variant="secondary" className={`mb-1 block ${getCategoryColor(event.category)}`}>
+                                                {event.time}
+                                            </Badge>
+                                            <div className="flex items-center space-x-2">
+                                                <MediaImage uuid={event.image} fileType={"Small Thumbnail"} className="w-8 h-8 rounded-full" />
+                                                <div className="overflow-hidden">
+                                                    <p className="text-sm font-medium truncate w-[120px]">{event.title}</p>
+                                                    <p className="text-xs text-muted-foreground line-clamp-2 w-[140px]">{event.description}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {hasMore && (
+                                        <p className="text-xs text-muted-foreground text-center mt-1">
+                                            +{dayEvents.length - maxEventsToShow} more
+                                        </p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )})}
                 </div>
                 
                 {/* Upcoming Events */}
                 <div className="flex space-x-4">
-                    <div className="w-2/3">
-                        <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
-                        <div className="space-y-4">
-                            {
-                                events
-                                .filter((event) => event.date >= new Date())
+                    {/* 左侧事件 */}
+                    <div className="w-3/4">
+                        {(() => {
+                            // 计算当天事件
+                            const todayEvents = events.filter(event => isSameDay(event.date, selectedDate));
+                            // 计算即将到来的事件（只取最近 2 个）
+                            const upcomingEvents = events
+                                .filter(event => event.date >= new Date())
                                 .sort((a, b) => a.date - b.date)
-                                .slice(0, 6)
-                                .map((event) => (
-                                    <Card key={event.id} className="p-4">
-                                        <div className="flex items-center space-x-4">
-                                            <img src={event.image || "/placeholder.svg"} alt={event.title} className="w-20 h-20 rounded-lg" />
-                                            <div className="flex-grow"> {/* 让文本内容自动填充剩余空间 */}
-                                            <h3 className="font-semibold">{event.title}</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                {format(event.date, "MMMM d, yyyy")} at {event.time}
-                                            </p>
-                                            <p className="text-sm">{event.description}</p>
-                                            <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
-                                            </div>
-                                            {/* 让按钮靠右 */}
-                                            <div className="flex justify-end">
-                                            <Button 
-                                            variant="outline" 
-                                            size="sm" 
-                                            onClick={() => openReviewModal(event)}
-                                            disabled={reviewedItems[event.id]}
-                                            className="ml-auto"
-                                            >
-                                            {reviewedItems[event.id] ? "Reviewed" : <><Star className="h-4 w-4 text-yellow-500" /> Rate</>}
-                                            </Button>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                    ))}
+                                .slice(0, 2);
+                            
+                            // 确定标题文本
+                            const titleText = todayEvents.length > 0 
+                                ? `Events on ${format(selectedDate, "MMMM d, yyyy")}` 
+                                : upcomingEvents.length > 0 
+                                ? "Upcoming Events" 
+                                : "No Events Available";
 
-                            {/* 评分弹窗 */}
-                            {
-                                reviewModal && (
-                                <Dialog open={reviewModal} onOpenChange={setReviewModal}>
-                                <DialogContent className="sm:max-w-md">
-                                    <DialogHeader>
-                                    <DialogTitle>Rate Your Experience</DialogTitle>
-                                    </DialogHeader>
-                                    <div className="flex justify-center space-x-2">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <Star
-                                        key={star}
-                                        className={`h-6 w-6 cursor-pointer ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
-                                        onClick={() => setRating(star)}
-                                        />
-                                    ))}
+                            return (
+                                <>
+                                    {/* 动态标题 */}
+                                    <h2 className="text-xl font-semibold mb-4">{titleText}</h2>
+
+                                    {/* 事件列表 */}
+                                    <div className="space-y-4">
+                                        {(todayEvents.length > 0 ? todayEvents : upcomingEvents.length > 0 ? upcomingEvents : []).map(event => (
+                                            <Card key={event.id} className="p-4">
+                                                <div className="flex items-center space-x-4">
+                                                    <MediaImage uuid={event.image} alt={event.title} fileType={"Small Thumbnail"} className="w-20 h-20 rounded-lg" />
+                                                    <div className="flex-grow">
+                                                        <h3 className="font-semibold truncate w-[160px]">{event.title}</h3>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {format(event.date, "MMMM d, yyyy")} at {event.time}
+                                                        </p>
+                                                        <p className="text-sm line-clamp-2 w-[200px]">{event.description}</p>
+                                                        <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
+                                                    </div>
+                                                    <div className="flex justify-end">
+                                                        <Button variant="outline" size="sm" onClick={() => openReviewModal(event)} disabled={reviewedItems[event.id]} className="ml-auto">
+                                                            {reviewedItems[event.id] ? "Reviewed" : <><Star className="h-4 w-4 text-yellow-500" /> Rate</>}
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        ))}
+
+                                        {/* 如果当天和即将到来的事件都为空，显示无事件提示 */}
+                                        {todayEvents.length === 0 && upcomingEvents.length === 0 && (
+                                            <div className="text-center text-muted-foreground">
+                                                <p className="text-sm">No events found for today or upcoming days.</p>
+                                            </div>
+                                        )}
+
+                                        {/* 评分弹窗 */}
+                                        {reviewModal && (
+                                            <Dialog open={reviewModal} onOpenChange={setReviewModal}>
+                                                <DialogContent className="sm:max-w-md">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Rate Your Experience</DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="flex justify-center space-x-2">
+                                                        {[1, 2, 3, 4, 5].map((star) => (
+                                                            <Star
+                                                                key={star}
+                                                                className={`h-6 w-6 cursor-pointer ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
+                                                                onClick={() => setRating(star)}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <Textarea
+                                                        value={reviewText}
+                                                        onChange={(e) => setReviewText(e.target.value)}
+                                                        placeholder="Share your experience..."
+                                                        className="w-full p-2 border rounded"
+                                                    />
+                                                    <DialogFooter>
+                                                        <Button onClick={handleReviewSubmit}>Submit</Button>
+                                                        <Button variant="secondary" onClick={() => setReviewModal(false)}>Cancel</Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        )}
                                     </div>
-                                    <Textarea
-                                    value={reviewText}
-                                    onChange={(e) => setReviewText(e.target.value)}
-                                    placeholder="Share your experience..."
-                                    className="w-full p-2 border rounded"
-                                    />
-                                    <DialogFooter>
-                                    <Button onClick={handleReviewSubmit}>Submit</Button>
-                                    <Button variant="secondary" onClick={() => setReviewModal(false)}>
-                                        Cancel
-                                    </Button>
-                                    </DialogFooter>
-                                </DialogContent>
-                                </Dialog>
-                            )}
-                        </div>
+                                </>
+                            );
+                        })()}
                     </div>
-                    <div className="w-1/3">
-                    <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border" />
+
+
+                    {/* 右侧事件 */}
+                    <div className="w-1/4">
+                        <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border" />
                     </div>
                 </div>
             </main>
