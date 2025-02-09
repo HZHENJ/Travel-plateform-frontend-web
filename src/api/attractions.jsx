@@ -30,12 +30,13 @@ export const fetchAttraction = async (offset = 0, limit = 6) => {
 
 // fetch hotel by uuid
 export const fetchAttractoionsByUUID = async(uuid) => {
+    const searchValues = Array.isArray(uuid) ? uuid.join(",") : uuid;
     try {
       const response = await axios.get(
         `${API_BASE_URL}/content/attractions/v2/search`, {
           params: {
             searchType: "uuids",
-            searchValues: uuid
+            searchValues: searchValues
           }, 
           headers: {
             "X-API-Key": API_KEY,
