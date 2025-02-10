@@ -8,6 +8,7 @@ import HotelDetailPage from "../pages/hotel/HotelDetailPage";
 import AttractionDetailPage from "../pages/attraction/AttractionDetailPage";
 import AttractionPage from "../pages/attraction/AttractionPage"
 import SchedulePage from "../pages/schedule/SchedulePage";
+import ProfilePage from "@/pages/profile/ProfilePage";
 import FlightSearch from "../pages/flight/FlightSearch";
 import FlightResults from "@/pages/flight/FlightResult";
 import FlightDetail from "@/pages/flight/FlightDetails";
@@ -37,6 +38,9 @@ const AppRoutes = () => {
 
           {/* schedule */}
           <Route path="/schedule" element={<SchedulePage />}/>
+
+          {/* profile */}
+          <Route path="/profile" element={<ProfilePage />}/>
 
           {/* flight */}
           <Route path="/flight" element={<FlightSearch />}/>

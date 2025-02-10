@@ -11,3 +11,7 @@ export const fetchUserSchedule = async (userId) => {
     return [];
   }
 };
+
+export const cancelSchedule = async () => {
+  
+};

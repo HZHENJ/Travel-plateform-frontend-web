@@ -5,7 +5,7 @@ const API_KEY = import.meta.env.VITE_API_KEY;
 const CONTENT_LANGUAGE = import.meta.env.VITE_CONTENT_LANGUAGE;
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-// fetch all hotels data from api
+// fetch all Attractions data from api
 export const fetchAttraction = async (offset = 0, limit = 6) => {
     try {
       const response = await axios.get(
@@ -28,14 +28,15 @@ export const fetchAttraction = async (offset = 0, limit = 6) => {
     }
 };
 
-// fetch hotel by uuid
+// fetch attraction by uuid
 export const fetchAttractoionsByUUID = async(uuid) => {
+    const searchValues = Array.isArray(uuid) ? uuid.join(",") : uuid;
     try {
       const response = await axios.get(
         `${API_BASE_URL}/content/attractions/v2/search`, {
           params: {
             searchType: "uuids",
-            searchValues: uuid
+            searchValues: searchValues
           }, 
           headers: {
             "X-API-Key": API_KEY,
@@ -45,9 +46,31 @@ export const fetchAttractoionsByUUID = async(uuid) => {
       )
       return response.data;
     } catch (error) {
-      console.error("fetchHotelsByUUID", error);
+      console.error("fetchAttractoionsByUUID", error);
       throw error;
     }
+};
+
+// fetch review & rating from backend
+export const fetchReviewRatingByUUID = async(uuid) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/content/attractions/v2/search`, {
+        params: {
+          searchType: "uuids",
+          searchValues: searchValues
+        }, 
+        headers: {
+          "X-API-Key": API_KEY,
+          "X-Content-Language": CONTENT_LANGUAGE,
+        },
+      }
+    )
+    return response.data;
+  } catch (error) {
+    console.error("fetchHotelsByUUID", error);
+    throw error;
+  }
 };
 
 // send transformed attraction data to backend
