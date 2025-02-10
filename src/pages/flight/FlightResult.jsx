@@ -15,15 +15,12 @@ export default function FlightResults() {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   useEffect(() => {
-    axios.get('/api/flights', {
-      params: {
-        from,
-        to,
-        date,
-        passengers
-      }
+    axios.post('http://localhost:8080/api/flights', {
+      from,
+      to,
+      date,
+      passengers
     })
       .then(response => {
         const data = response.data.map(flight => ({
@@ -44,6 +41,7 @@ export default function FlightResults() {
         setLoading(false);
       });
   }, [from, to, date, passengers]);
+  
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
   if (error) return <div className="text-center mt-10 text-red-600">Error fetching flights!</div>;
