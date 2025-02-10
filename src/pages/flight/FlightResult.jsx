@@ -52,7 +52,7 @@ export default function FlightResults() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6 text-blue-600">搜索结果</h2>
+        <h2 className="text-2xl font-bold mb-6 text-blue-600">Result</h2>
         <div className="space-y-4">
           {flights.map(flight => (
             <div 
@@ -73,7 +73,7 @@ export default function FlightResults() {
                     <FaClock className="mr-2" />
                     <span>{flight.duration}</span>
                     {flight.stops > 0 && (
-                      <span className="ml-2 text-orange-600">经停 {flight.stops} 站</span>
+                      <span className="ml-2 text-orange-600"> {flight.stops} Stop</span>
                     )}
                   </div>
                 </div>
