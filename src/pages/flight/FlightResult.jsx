@@ -1,42 +1,60 @@
 // FlightResults.jsx
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaPlaneDeparture, FaClock, FaDollarSign } from 'react-icons/fa';
+import axios from 'axios';
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 
-const mockFlights = [
-  {
-    id: 1,
-    airline: '中国国际航空',
-    flightNo: 'CA1234',
-    departure: '北京 (PEK) 08:00',
-    arrival: '上海 (PVG) 10:30',
-    duration: '2小时30分',
-    price: 1200,
-    stops: 0
-  },
-  {
-    id: 2,
-    airline: '东方航空',
-    flightNo: 'MU5678',
-    departure: '北京 (PEK) 10:30',
-    arrival: '上海 (PVG) 13:00',
-    duration: '2小时30分',
-    price: 1100,
-    stops: 1
-  }
-];
 
 export default function FlightResults() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { from, to, date, passengers } = location.state || {};
+
+  const [flights, setFlights] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    axios.get('/api/flights', {
+      params: {
+        from,
+        to,
+        date,
+        passengers
+      }
+    })
+      .then(response => {
+        const data = response.data.map(flight => ({
+          id: flight.flightId,
+          airline: flight.airline,
+          flightNo: flight.flightNumber,
+          departure: `${flight.departureCity} (${flight.departureAirport}) ${new Date(flight.departureTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`,
+          arrival: `${flight.arrivalCity} (${flight.arrivalAirport}) ${new Date(flight.arrivalTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`,
+          duration: flight.duration,
+          price: flight.seatAvailability.Economy * 10, // Example: price calculated based on economy seats availability
+          stops: flight.stops || 0
+        }));
+        setFlights(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        setError(error);
+        setLoading(false);
+      });
+  }, [from, to, date, passengers]);
+
+  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  if (error) return <div className="text-center mt-10 text-red-600">Error fetching flights!</div>;
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
-        <h2 className="text-2xl font-bold mb-6 text-blue-600">搜索结果</h2>
+        <h2 className="text-2xl font-bold mb-6 text-blue-600">Result</h2>
         <div className="space-y-4">
-          {mockFlights.map(flight => (
+          {flights.map(flight => (
             <div 
               key={flight.id}
               className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
@@ -55,7 +73,7 @@ export default function FlightResults() {
                     <FaClock className="mr-2" />
                     <span>{flight.duration}</span>
                     {flight.stops > 0 && (
-                      <span className="ml-2 text-orange-600">经停 {flight.stops} 站</span>
+                      <span className="ml-2 text-orange-600"> {flight.stops} Stop</span>
                     )}
                   </div>
                 </div>
@@ -70,7 +88,7 @@ export default function FlightResults() {
                       navigate(`/detail/${flight.id}`);
                     }}
                   >
-                    选择
+                    Select
                   </button>
                 </div>
               </div>

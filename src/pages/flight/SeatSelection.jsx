@@ -32,11 +32,11 @@ export default function SeatSelection() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 min-h-screen">
-      <h2 className="text-2xl font-bold mb-6 text-blue-600">选择座位</h2>
+      <h2 className="text-2xl font-bold mb-6 text-blue-600">Select Seats</h2>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="mb-8">
           <div className="w-full h-16 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-            <span className="text-gray-600">驾驶舱</span>
+            <span className="text-gray-600">Cabin</span>
           </div>
           
           {seats.map((row, rowIndex) => (
@@ -62,14 +62,14 @@ export default function SeatSelection() {
         </div>
 
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="font-semibold mb-2">已选座位：</h3>
+          <h3 className="font-semibold mb-2">Selected Seats:</h3>
           <div className="flex flex-wrap gap-2">
             {selectedSeats.map(seat => (
               <span key={seat} className="bg-blue-100 text-blue-800 px-3 py-1 rounded">
                 {seat}
               </span>
             ))}
-            {selectedSeats.length === 0 && <span className="text-gray-500">尚未选择座位</span>}
+            {selectedSeats.length === 0 && <span className="text-gray-500">No seats selected yet</span>}
           </div>
         </div>
 
@@ -78,7 +78,7 @@ export default function SeatSelection() {
           className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 w-full transition-colors"
           disabled={selectedSeats.length === 0}
         >
-          确认座位 ({selectedSeats.length}个)
+          Confirm Seats ({selectedSeats.length} seats)
         </button>
       </div>
     </div>
