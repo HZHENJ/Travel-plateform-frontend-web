@@ -7,6 +7,7 @@ import { fetchHotelsByUUID } from "../../api/hotels";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+// ImageCarousel
 const ImageCarousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
 

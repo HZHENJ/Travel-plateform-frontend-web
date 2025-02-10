@@ -287,9 +287,6 @@ const SchedulePage = () => {
                         )}
                     </div>
 
-
-
-
                     {/* 右侧事件 */}
                     <div className="w-1/4">
                         <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border" />
