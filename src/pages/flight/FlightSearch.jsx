@@ -28,13 +28,13 @@ export default function FlightSearch() {
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">出发地</label>
+                <label className="block text-sm font-medium mb-2">Starting Point</label>
                 <div className="relative">
                   <FaPlane className="absolute top-3 left-3 text-gray-400" />
                   <input
                     type="text"
                     className="pl-10 p-2 border rounded w-full"
-                    placeholder="例如：北京"
+                    placeholder="Beijing"
                     value={form.from}
                     onChange={(e) => setForm({ ...form, from: e.target.value })}
                     required
@@ -43,13 +43,13 @@ export default function FlightSearch() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-2">目的地</label>
+                <label className="block text-sm font-medium mb-2">Destination</label>
                 <div className="relative">
                   <FaPlane className="absolute top-3 left-3 text-gray-400" />
                   <input
                     type="text"
                     className="pl-10 p-2 border rounded w-full"
-                    placeholder="例如：上海"
+                    placeholder="Shanghai"
                     value={form.to}
                     onChange={(e) => setForm({ ...form, to: e.target.value })}
                     required
@@ -58,7 +58,7 @@ export default function FlightSearch() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">出发日期</label>
+                <label className="block text-sm font-medium mb-2">Departure date</label>
                 <div className="relative">
                   <FaCalendarAlt className="absolute top-3 left-3 text-gray-400" />
                   <input
@@ -72,7 +72,7 @@ export default function FlightSearch() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">乘客</label>
+                <label className="block text-sm font-medium mb-2">Passenger</label>
                 <div className="relative">
                   <FaUser className="absolute top-3 left-3 text-gray-400" />
                   <select
@@ -92,7 +92,7 @@ export default function FlightSearch() {
               type="submit"
               className="mt-6 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 w-full transition-colors"
             >
-              搜索航班
+              Search
             </button>
           </form>
         </div>

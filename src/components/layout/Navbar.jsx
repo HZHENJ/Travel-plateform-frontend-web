@@ -23,13 +23,13 @@ export default function Navbar () {
   return(
     <nav className="bg-blue-600 text-white">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="#" className="text-2xl font-bold">Singapore Travel</a>
+        <Link to="/" className="text-2xl font-bold">Singapore Travel</Link>
         <div className="hidden md:flex space-x-4">
           <Link to="/" className="hover:text-blue-200 transition duration-300">Home</Link>
-          <Link to="/flight" className="hover:text-blue-200 transition duration-300">Flight</Link>
+          <Link to="/flight" className="hover:text-blue-200 transition duration-300">Flights</Link>
           <Link to="/hotels" className="hover:text-blue-200 transition duration-300">Hotels</Link>
-          <Link to="/attractions" className="hover:text-blue-200 transition duration-300">Atrractions</Link>
-          <Link to="/schedule" className="hover:text-blue-200 transition duration-300">Schedule</Link>
+          <Link to="/attractions" className="hover:text-blue-200 transition duration-300">Attractions</Link>
+          <Link to="/schedule" className="hover:text-blue-200 transition duration-300">Schedules</Link>
         </div>
 
         {/* 根据 `isLoggedIn` 状态显示不同按钮 */}

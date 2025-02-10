@@ -8,14 +8,14 @@ import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { fetchUserSchedule } from "../../api/schedule"
-import MediaImage from "../../components/common/media/MediaImage";
-
+import { fetchAttractoionsByUUID } from "../../api/attractions"
 import { checkUserReview, submitReview } from "../../api/review"
 
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 import Pagination from "../../components/common/Pagination"
-import { fetchAttractoionsByUUID } from "../../api/attractions"
+import MediaImage from "../../components/common/media/MediaImage";
+
   
 const SchedulePage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date())
@@ -48,6 +48,7 @@ const SchedulePage = () => {
             // console.log(attractionMap)
             const transformedEvents = bookings.map((booking) => ({
                 id: booking.attractionId,
+                bookingId: booking.bookingId,
                 date: parseISO(booking.visitDate),
                 time: format(parseISO(booking.visitTime), "hh:mm a"),
                 title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
