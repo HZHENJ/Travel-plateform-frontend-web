@@ -211,93 +211,82 @@ const SchedulePage = () => {
                 <div className="flex space-x-4">
                     {/* 左侧事件 */}
                     <div className="w-3/4">
-                        {(() => {
-                            // 计算当天事件
-                            const todayEvents = events.filter(event => isSameDay(event.date, selectedDate));
-                            // 计算即将到来的事件（只取最近 2 个）
-                            const upcomingEvents = events.filter(event => event.date >= new Date()).sort((a, b) => a.date - b.date).slice(0, 2);
-                            
-                            // 确定标题文本
-                            const titleText = todayEvents.length > 0 
-                                ? `Events on ${format(selectedDate, "MMMM d, yyyy")}` 
-                                : upcomingEvents.length > 0 
-                                ? "Upcoming Events" 
-                                : "No Events Available";
+                        <h2 className="text-xl font-semibold mb-4">{titleText}</h2>
 
-                            return (
-                                <>
-                                    {/* 动态标题 */}
-                                    <h2 className="text-xl font-semibold mb-4">{titleText}</h2>
-
-                                    {/* 事件列表 */}
-                                    <div className="space-y-4">
-                                        {(todayEvents.length > 0 ? todayEvents : upcomingEvents.length > 0 ? upcomingEvents : []).map(event => (
-                                            <Card key={event.id} className="p-4">
-                                                <div className="flex items-center space-x-4">
-                                                    <MediaImage uuid={event.image} alt={event.title} fileType={"Small Thumbnail"} className="w-20 h-20 rounded-lg" />
-                                                    <div className="flex-grow">
-                                                        <h3 className="font-semibold truncate w-[160px]">{event.title}</h3>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {format(event.date, "MMMM d, yyyy")} at {event.time}
-                                                        </p>
-                                                        <p className="text-sm line-clamp-2 w-[200px]">{event.description}</p>
-                                                        <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
-                                                    </div>
-                                                    <div className="flex justify-end">
-                                                        <Button variant="outline" size="sm" onClick={() => openReviewModal(event)} disabled={reviewedItems[event.id]} className="ml-auto">
-                                                            {reviewedItems[event.id] ? "Reviewed" : <><Star className="h-4 w-4 text-yellow-500" /> Rate</>}
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </Card>
-                                        ))}
-
-                                        {/* 如果当天和即将到来的事件都为空，显示无事件提示 */}
-                                        {todayEvents.length === 0 && upcomingEvents.length === 0 && (
-                                            <div className="text-center text-muted-foreground">
-                                                <p className="text-sm">No events found for today or upcoming days.</p>
+                        <div className="space-y-4">
+                            {paginatedEvents.length > 0 ? (
+                                paginatedEvents.map(event => (
+                                    <Card key={event.id} className="p-4">
+                                        <div className="flex items-center space-x-4">
+                                            <MediaImage uuid={event.image} alt={event.title} fileType={"Small Thumbnail"} className="w-20 h-20 rounded-lg" />
+                                            <div className="flex-grow">
+                                                <h3 className="font-semibold truncate w-[250px]">{event.title}</h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {format(event.date, "MMMM d, yyyy")} at {event.time}
+                                                </p>
+                                                <p className="text-sm line-clamp-2 w-[200px]">{event.description}</p>
+                                                <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
                                             </div>
-                                        )}
-
-                                        {/* 评分弹窗 */}
-                                        {reviewModal && (
-                                            <Dialog open={reviewModal} onOpenChange={setReviewModal}>
-                                                <DialogContent className="sm:max-w-md">
-                                                    <DialogHeader>
-                                                        <DialogTitle>Rate Your Experience</DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="flex justify-center space-x-2">
-                                                        {[1, 2, 3, 4, 5].map((star) => (
-                                                            <Star
-                                                                key={star}
-                                                                className={`h-6 w-6 cursor-pointer ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
-                                                                onClick={() => setRating(star)}
-                                                            />
-                                                        ))}
-                                                    </div>
-                                                    <Textarea
-                                                        value={reviewText}
-                                                        onChange={(e) => setReviewText(e.target.value)}
-                                                        placeholder="Share your experience..."
-                                                        className="w-full p-2 border rounded"
-                                                    />
-                                                    <DialogFooter>
-                                                        <Button onClick={handleReviewSubmit}>Submit</Button>
-                                                        <Button variant="secondary" onClick={() => setReviewModal(false)}>Cancel</Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                        )}
+                                            <div className="flex space-x-2">
+                                                <Button variant="outline" size="sm" onClick={() => openReviewModal(event)} disabled={reviewedItems[event.id]} className="ml-auto">
+                                                    {reviewedItems[event.id] ? "Reviewed" : <><Star className="h-4 w-4 text-yellow-500" /> Rate</>}
+                                                </Button>
+                                                <Button variant="destructive" size="sm" onClick={() => handleCancelBooking(event.id)}
+                                                    disabled={new Date() > event.date}className="ml-auto">
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                ))
+                            ) : (
+                                <div className="text-center text-muted-foreground">
+                                    <p className="text-sm">No events found for today or upcoming days.</p>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* 评论模态框 */}
+                        {reviewModal && (
+                            <Dialog open={reviewModal} onOpenChange={setReviewModal}>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Rate Your Experience</DialogTitle>
+                                    </DialogHeader>
+                                    <div className="flex justify-center space-x-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <Star
+                                                key={star}
+                                                className={`h-6 w-6 cursor-pointer ${star <= rating ? "text-yellow-500" : "text-gray-400"}`}
+                                                onClick={() => setRating(star)}
+                                            />
+                                        ))}
                                     </div>
+                                    <Textarea
+                                        value={reviewText}
+                                        onChange={(e) => setReviewText(e.target.value)}
+                                        placeholder="Share your experience..."
+                                        className="w-full p-2 border rounded"
+                                    />
+                                    <DialogFooter>
+                                        <Button onClick={handleReviewSubmit}>Submit</Button>
+                                        <Button variant="secondary" onClick={() => setReviewModal(false)}>Cancel</Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        )}
 
-                                    {/* 分页组件 */}
-                                    {totalPages > 1 && (
-                                        <Pagination totalPages={totalPages}currentPage={currentPage} onPageChange={setCurrentPage}/>
-                                    )}
-                                </>
-                            );
-                        })()}
+                        {/* 分页组件 */}
+                        {totalPages > 1 && (
+                            <Pagination
+                                totalPages={totalPages}
+                                currentPage={currentPage}
+                                onPageChange={setCurrentPage}
+                            />
+                        )}
                     </div>
+
+
 
 
                     {/* 右侧事件 */}
