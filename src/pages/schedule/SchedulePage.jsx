@@ -20,9 +20,9 @@ import { fetchAttractoionsByUUID } from "../../api/attractions"
 const SchedulePage = () => {
     const [selectedDate, setSelectedDate] = useState(new Date())
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [reviewedItems, setReviewedItems] = useState({});
     const [events, setEvents] = useState([])
 
+    const [reviewedItems, setReviewedItems] = useState({});
     const [reviewModal, setReviewModal] = useState(false);
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(5); // 默认评分
@@ -47,7 +47,7 @@ const SchedulePage = () => {
 
             // console.log(attractionMap)
             const transformedEvents = bookings.map((booking) => ({
-                id: booking.attractionBookingId,
+                id: booking.attractionId,
                 date: parseISO(booking.visitDate),
                 time: format(parseISO(booking.visitTime), "hh:mm a"),
                 title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
@@ -55,7 +55,7 @@ const SchedulePage = () => {
                 image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
                 category: "attraction",
             }));
-            console.log(transformedEvents)
+            // console.log(transformedEvents)
             setEvents(transformedEvents);
         };
         // 
@@ -109,7 +109,7 @@ const SchedulePage = () => {
             const reviewData = {
                 userId,
                 itemType: "Attraction",
-                itemId: selectedEvent.id, // AttractionBooking ID
+                itemId: selectedEvent.id, // attraction id
                 rating,
                 comment: reviewText
             };

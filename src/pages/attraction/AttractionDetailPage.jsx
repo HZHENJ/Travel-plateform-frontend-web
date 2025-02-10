@@ -11,6 +11,7 @@ import { fetchAttractoionsByUUID } from "../../api/attractions";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+// ImageCarousel
 const ImageCarousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -58,6 +59,7 @@ const ImageCarousel = ({ images }) => {
   )
 }
 
+// main page
 const AttractionDetailPage = () => {
   const { uuid } = useParams();
   const [attractionDetail, setAttractions] = useState(null)
@@ -78,8 +80,9 @@ const AttractionDetailPage = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await fetchAttractoionsByUUID(uuid);
-        const attraction = Array.isArray(response.data) && response.data.length > 0 ? response.data[0] : null;
+        const responseFromAPI = await fetchAttractoionsByUUID(uuid);
+        // const responseFromBE = await
+        const attraction = Array.isArray(responseFromAPI.data) && responseFromAPI.data.length > 0 ? responseFromAPI.data[0] : null;
         setAttractions(attraction)
       } catch (error) {
         console.error("HotelDetail", error)
@@ -88,6 +91,7 @@ const AttractionDetailPage = () => {
     getData();
   }, [uuid]);
 
+  // debug
   // console.log("attractionDetail detail:", attractionDetail)
 
   // UI
