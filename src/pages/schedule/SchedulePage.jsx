@@ -9,7 +9,7 @@ import { Badge } from "../../components/ui/badge"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { fetchUserSchedule } from "../../api/schedule"
 import { fetchAttractoionsByUUID } from "../../api/attractions"
-import { checkUserReview, submitReview } from "../../api/review"
+import { submitReview } from "../../api/review"
 
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
@@ -22,7 +22,7 @@ const SchedulePage = () => {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [events, setEvents] = useState([])
 
-    const [reviewedItems, setReviewedItems] = useState({});
+    // const [reviewedItems, setReviewedItems] = useState({});
     const [reviewModal, setReviewModal] = useState(false);
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(5); // 默认评分
@@ -39,41 +39,27 @@ const SchedulePage = () => {
     useEffect(() => {
         const loadSchedule = async () => {
             const bookings = await fetchUserSchedule(userId);
-            // 提取所有 attractionUuid 并存入数组
             const attractionUuids = bookings.map(booking => booking.attractionUuid);
             const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
-            // 创建一个 `uuid` 到 `attraction` 的映射
             const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
 
-            // console.log(attractionMap)
             const transformedEvents = bookings.map((booking) => ({
                 id: booking.attractionId,
                 bookingId: booking.bookingId,
                 date: parseISO(booking.visitDate),
                 time: format(parseISO(booking.visitTime), "hh:mm a"),
                 title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
-                // description: `Booking ID: ${booking.bookingId}`,
                 image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
                 category: "attraction",
             }));
-            // console.log(transformedEvents)
             setEvents(transformedEvents);
-        };
-        // 
-        const checkReviews = async () => {
-            const reviewStatus = {};
-            for (const event of events) {
-                reviewStatus[event.id] = await checkUserReview(userId, event.id);
-            }
-            setReviewedItems(reviewStatus);
         };
 
         // 判断用户
         if (userId) {
             loadSchedule();
-            checkReviews();
         }
-    }, [userId, events]);
+    }, [userId]);
 
     // 计算当天事件
     const todayEvents = events.filter(event => isSameDay(event.date, selectedDate));
@@ -111,10 +97,11 @@ const SchedulePage = () => {
                 userId,
                 itemType: "Attraction",
                 itemId: selectedEvent.id, // attraction id
+                bookingId: selectedEvent.bookingId,
                 rating,
                 comment: reviewText
             };
-            console.log(reviewData)
+            // console.log(reviewData)
 
             await submitReview(reviewData);
             setReviewModal(false);
@@ -125,14 +112,10 @@ const SchedulePage = () => {
     };
     
     // 上个星期
-    const handlePreviousWeek = () => {
-        setSelectedDate(addDays(selectedDate, -7))
-    }
+    const handlePreviousWeek = () => { setSelectedDate(addDays(selectedDate, -7))}
 
     // 下个星期
-    const handleNextWeek = () => {
-        setSelectedDate(addDays(selectedDate, 7))
-    }
+    const handleNextWeek = () => { setSelectedDate(addDays(selectedDate, 7))}
 
     // 设置类别颜色
     const getCategoryColor = (category) => {
@@ -185,7 +168,7 @@ const SchedulePage = () => {
 
                                 <CardContent className="p-0">
                                     {dayEvents.slice(0, maxEventsToShow).map((event) => (
-                                        <div key={event.id} className="mb-2 last:mb-0">
+                                        <div key={event.bookingId} className="mb-2 last:mb-0">
                                             {/* <Badge variant="secondary" className={`mb-1 block ${getCategoryColor(event.category)}`}>{event.time}</Badge> */}
                                             <div className="flex items-center space-x-2">
                                                 <MediaImage uuid={event.image} fileType={"Small Thumbnail"} className="w-8 h-8 rounded-full" />
@@ -217,7 +200,7 @@ const SchedulePage = () => {
                         <div className="space-y-4">
                             {paginatedEvents.length > 0 ? (
                                 paginatedEvents.map(event => (
-                                    <Card key={event.id} className="p-4">
+                                    <Card key={event.bookingId} className="p-4">
                                         <div className="flex items-center space-x-4">
                                             <MediaImage uuid={event.image} alt={event.title} fileType={"Small Thumbnail"} className="w-20 h-20 rounded-lg" />
                                             <div className="flex-grow">
@@ -229,10 +212,10 @@ const SchedulePage = () => {
                                                 <Badge className={`mt-2 ${getCategoryColor(event.category)}`}>{event.category}</Badge>
                                             </div>
                                             <div className="flex space-x-2">
-                                                <Button variant="outline" size="sm" onClick={() => openReviewModal(event)} disabled={reviewedItems[event.id]} className="ml-auto">
-                                                    {reviewedItems[event.id] ? "Reviewed" : <><Star className="h-4 w-4 text-yellow-500" /> Rate</>}
+                                                <Button variant="outline" size="sm" onClick={() => openReviewModal(event)}>
+                                                    <Star className="h-4 w-4 text-yellow-500" /> Rate
                                                 </Button>
-                                                <Button variant="destructive" size="sm" onClick={() => handleCancelBooking(event.id)}
+                                                <Button variant="destructive" size="sm" onClick={() => handleCancelBooking(event.bookingId)}
                                                     disabled={new Date() > event.date}className="ml-auto">
                                                     Cancel
                                                 </Button>

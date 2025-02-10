@@ -54,21 +54,10 @@ export const fetchAttractoionsByUUID = async(uuid) => {
 // fetch review & rating from backend
 export const fetchReviewRatingByUUID = async(uuid) => {
   try {
-    const response = await axios.get(
-      `${API_BASE_URL}/content/attractions/v2/search`, {
-        params: {
-          searchType: "uuids",
-          searchValues: searchValues
-        }, 
-        headers: {
-          "X-API-Key": API_KEY,
-          "X-Content-Language": CONTENT_LANGUAGE,
-        },
-      }
-    )
+    const response = await axios.get(`${BACKEND_URL}/api/attractions/${uuid}/reviews`)
     return response.data;
   } catch (error) {
-    console.error("fetchHotelsByUUID", error);
+    console.error("fetchReviewRatingByUUID", error);
     throw error;
   }
 };

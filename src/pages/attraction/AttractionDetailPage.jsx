@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { BookingModal } from "@/components/common/attraction/BookingModal";
 
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchAttractoionsByUUID } from "../../api/attractions";
+import { fetchAttractoionsByUUID, fetchReviewRatingByUUID } from "../../api/attractions";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -63,10 +63,9 @@ const ImageCarousel = ({ images }) => {
 const AttractionDetailPage = () => {
   const { uuid } = useParams();
   const [attractionDetail, setAttractions] = useState(null)
+  const [reviews, setReviews] = useState({})
   const [visibleReviews, setVisibleReviews] = useState(3)
-
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
-  
   const openBookingModal = useCallback(() => setIsBookingModalOpen(true), [])
   const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), [])
 
@@ -79,13 +78,20 @@ const AttractionDetailPage = () => {
 
   useEffect(() => {
     const getData = async () => {
+      // fetch data
       try {
-        const responseFromAPI = await fetchAttractoionsByUUID(uuid);
-        // const responseFromBE = await
-        const attraction = Array.isArray(responseFromAPI.data) && responseFromAPI.data.length > 0 ? responseFromAPI.data[0] : null;
+        const reviewsData = await fetchReviewRatingByUUID(uuid); // 这里注意需要有数据库才可以！！！
+        setReviews(reviewsData)
+      } catch (error) {
+        console.error("reviewsData - no uuid", error)
+      }
+
+      try {
+        const attractionData = await fetchAttractoionsByUUID(uuid);
+        const attraction = Array.isArray(attractionData.data) && attractionData.data.length > 0 ? attractionData.data[0] : null;
         setAttractions(attraction)
       } catch (error) {
-        console.error("HotelDetail", error)
+        console.error("attractionData", error)
       }
     };
     getData();
@@ -93,6 +99,7 @@ const AttractionDetailPage = () => {
 
   // debug
   // console.log("attractionDetail detail:", attractionDetail)
+  console.log("Reviews:", reviews)
 
   // UI
   if (!attractionDetail) {
@@ -180,17 +187,7 @@ const AttractionDetailPage = () => {
                   ))}
                 </div>
               )}
-            {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
-              {attractionDetail.businessHour.map((hour) => (
-                <div key={hour.sequenceNumber} className="flex items-center text-gray-700">
-                  <Clock className="w-5 h-5 mr-2" />
-                  <span className="capitalize">{hour.day}: </span>
-                  <span className="ml-1">
-                    {hour.openTime} - {hour.closeTime}
-                  </span>
-                </div>
-              ))}
-            </div> */}
+
             {attractionDetail.businessHourNotes && (
               <p className="text-sm text-gray-600 mb-6">{attractionDetail.businessHourNotes.notes}</p>
             )}
@@ -231,7 +228,7 @@ const AttractionDetailPage = () => {
               </p>
               <p className="flex items-center text-gray-700">
                 <Phone className="w-5 h-5 mr-2" />
-                {attractionDetail.contact.primaryContactNo}
+                {attractionDetail?.contact?.primaryContactNo || attractionDetail?.contact?.secondaryContactNo || "No Contact"}
               </p>
             </div>
 
@@ -245,24 +242,25 @@ const AttractionDetailPage = () => {
           </div>
         </div>
 
+        {/* reviews */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Recent Reviews</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {
-              attractionDetail.reviews.length > 0 ? 
-              attractionDetail.reviews.slice(0, visibleReviews).map((review, index) => (
+              reviews.length > 0 ? 
+              reviews.slice(0, visibleReviews).map((review, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-4">
                 <div className="flex items-center mb-2">
                   <Star className="text-yellow-400 w-5 h-5" />
                   <span className="ml-1 font-semibold">{review.rating}</span>
                 </div>
                 <p className="text-gray-700 mb-2">{review.comment}</p>
-                <p className="text-sm text-gray-500">- {review.user}</p>
+                <p className="text-sm text-gray-500">- {review.username}</p>
               </div>
             )) : <p>No Reviews</p>
           }
           </div>
-          {visibleReviews < attractionDetail.reviews.length && (
+          {visibleReviews < reviews.length && (
             <div className="mt-4 text-center">
               <button
                 onClick={loadMoreReviews}
