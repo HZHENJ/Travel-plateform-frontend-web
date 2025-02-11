@@ -15,3 +15,13 @@ export const fetchUserSchedule = async (userId) => {
 export const cancelSchedule = async () => {
   
 };
+
+export const fetchUserHotelSchedule = async (userId) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/api/hotels/bookings/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching schedule:", error);
+    return [];
+  }
+};
