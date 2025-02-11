@@ -1,9 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-// import { PreferenceForm } from "../components/PreferenceForm"
-// import { updatePreferences } from "../actions/preferences"
-// import { TravelStats } from "../components/TravelStats"
-// import { UpcomingTrip } from "../components/UpcomingTrip"
 import { User, Settings, Plane, Calendar } from "lucide-react"
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
@@ -40,15 +36,15 @@ const ProfilePage = () => {
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="container mx-auto py-10 px-6 md:px-10 lg:px-16 max-w-4xl">
-          <h1 className="text-3xl font-bold mb-8">个人信息</h1>
+          <h1 className="text-3xl font-bold mb-8">Personal Information</h1>
           <div className="space-y-8">
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <User className="h-6 w-6" />
-                  基本信息
+                  Basic information
                 </CardTitle>
-                <CardDescription className="text-base">您的账户详情</CardDescription>
+                <CardDescription className="text-base">Your account details</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center space-x-6">
                 <Avatar className="h-24 w-24">
@@ -62,44 +58,18 @@ const ProfilePage = () => {
               </CardContent>
             </Card>
 
-            {/* <Card className="shadow-md">
+            <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl">
                   <Settings className="h-6 w-6" />
-                  旅行偏好设置
+                  Travel preferences
                 </CardTitle>
-                <CardDescription className="text-base">自定义您的旅行体验</CardDescription>
+                <CardDescription className="text-base">Customize your travel experience</CardDescription>
               </CardHeader>
               <CardContent>
-                <PreferenceForm initialData={userData.preferences} onSubmit={updatePreferences} />
+                
               </CardContent>
-            </Card> */}
-
-            {/* <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Plane className="h-6 w-6" />
-                  旅行统计
-                </CardTitle>
-                <CardDescription className="text-base">您的旅行足迹</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TravelStats stats={userData.stats} />
-              </CardContent>
-            </Card> */}
-
-            {/* <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Calendar className="h-6 w-6" />
-                  即将到来的旅行
-                </CardTitle>
-                <CardDescription className="text-base">准备好您的下一次冒险</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UpcomingTrip trip={userData.upcomingTrip} />
-              </CardContent>
-            </Card> */}
+            </Card>
           </div>
         </div>
       </main>
