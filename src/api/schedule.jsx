@@ -16,7 +16,7 @@ export const cancelSchedule = async () => {
   
 };
 
-export const fetchUserHotelSchedule = async (userId) => {
+export const fetchUserHotelBookings = async (userId) => {
   try {
     const response = await axios.get(`${BACKEND_URL}/api/hotels/bookings/${userId}`);
     return response.data;

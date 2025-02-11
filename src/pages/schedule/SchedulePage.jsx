@@ -8,7 +8,9 @@ import { Textarea } from "../../components/ui/textarea";
 import { Badge } from "../../components/ui/badge"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { fetchUserSchedule } from "../../api/schedule"
+import { fetchUserHotelBookings } from "../../api/schedule"
 import { fetchAttractoionsByUUID } from "../../api/attractions"
+import { fetchHotelsByUUID } from "../../api/hotels"
 import { submitReview } from "../../api/review"
 
 import Navbar from "../../components/layout/Navbar"
@@ -38,12 +40,20 @@ const SchedulePage = () => {
     // 获取后端数据
     useEffect(() => {
         const loadSchedule = async () => {
-            const bookings = await fetchUserSchedule(userId);
+            if (!userId) return;
+
+            // 1. 并行获取AttractionBooking & HotelBooking
+            const [bookings, hotelBookings] = await Promise.all([
+                fetchUserSchedule(userId),
+                fetchUserHotelBookings(userId),
+            ]);
+
+            // 处理景点预订数据
             const attractionUuids = bookings.map(booking => booking.attractionUuid);
             const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
             const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
 
-            const transformedEvents = bookings.map((booking) => ({
+            const transformedAttractionEvents = bookings.map((booking) => ({
                 id: booking.attractionId,
                 bookingId: booking.bookingId,
                 date: parseISO(booking.visitDate),
@@ -52,7 +62,24 @@ const SchedulePage = () => {
                 image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
                 category: "attraction",
             }));
-            setEvents(transformedEvents);
+
+            // 处理酒店预订数据
+            const hotelUuids = hotelBookings.map(booking => booking.hotelUuid);
+            const hotelDetails = await fetchHotelsByUUID(hotelUuids)
+            const hotelMap = new Map(hotelDetails.data.map(hotel => [hotel.uuid, hotel]));
+            console.log(hotelMap)
+            const transformedHotelEvents = hotelBookings.map((booking) => ({
+                id: booking.hotelId,
+                bookingId: booking.bookingId,
+                date: parseISO(booking.checkInDate),
+                time: "Check-in",
+                title: hotelMap.get(booking.hotelUuid)?.name || "Unknown Hotel",
+                image: hotelMap.get(booking.hotelUuid)?.thumbnails?.[0]?.uuid || "/hotel-placeholder.svg",
+                category: "hotel",
+            }));
+
+            // 
+            setEvents([...transformedAttractionEvents, ...transformedHotelEvents]);
         };
 
         // 判断用户
@@ -101,7 +128,6 @@ const SchedulePage = () => {
                 rating,
                 comment: reviewText
             };
-            // console.log(reviewData)
 
             await submitReview(reviewData);
             setReviewModal(false);
@@ -110,6 +136,22 @@ const SchedulePage = () => {
             alert("Failed to submit review.");
         }
     };
+
+    const handleCancelBooking = async (bookingId, category) => {
+        if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+    
+        try {
+            if (category === "hotel") {
+                await cancelHotelBooking(bookingId);
+            } else {
+                await cancelAttractionBooking(bookingId);
+            }
+            setEvents(events.filter(event => event.bookingId !== bookingId));
+        } catch (error) {
+            console.error("Error canceling booking:", error);
+        }
+    };
+    
     
     // 上个星期
     const handlePreviousWeek = () => { setSelectedDate(addDays(selectedDate, -7))}
@@ -122,10 +164,8 @@ const SchedulePage = () => {
         switch (category) {
         case "attraction":
             return "bg-blue-100 text-blue-800"
-        case "personal":
+        case "hotel":
             return "bg-green-100 text-green-800"
-        case "social":
-            return "bg-purple-100 text-purple-800"
         default:
             return "bg-gray-100 text-gray-800"
         }
@@ -204,7 +244,9 @@ const SchedulePage = () => {
                                         <div className="flex items-center space-x-4">
                                             <MediaImage uuid={event.image} alt={event.title} fileType={"Small Thumbnail"} className="w-20 h-20 rounded-lg" />
                                             <div className="flex-grow">
-                                                <h3 className="font-semibold truncate w-[250px]">{event.title}</h3>
+                                                <h3 className="font-semibold truncate w-[400px]">
+                                                    {event.title}
+                                                </h3>
                                                 <p className="text-sm text-muted-foreground">
                                                     {format(event.date, "MMMM d, yyyy")} at {event.time}
                                                 </p>
