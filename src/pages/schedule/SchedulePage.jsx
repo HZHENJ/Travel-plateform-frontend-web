@@ -53,22 +53,26 @@ const SchedulePage = () => {
             const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
             const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
 
-            const transformedAttractionEvents = bookings.map((booking) => ({
-                id: booking.attractionId,
-                bookingId: booking.bookingId,
-                date: parseISO(booking.visitDate),
-                time: format(parseISO(booking.visitTime), "hh:mm a"),
-                title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
-                image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
-                category: "attraction",
+            const transformedAttractionEvents = bookings
+                .filter(booking => booking.status !== "Canceled")
+                .map((booking) => ({
+                    id: booking.attractionId,
+                    bookingId: booking.bookingId,
+                    date: parseISO(booking.visitDate),
+                    time: format(parseISO(booking.visitTime), "hh:mm a"),
+                    title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
+                    image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
+                    category: "attraction",
+                    status: booking.status
             }));
 
             // 处理酒店预订数据
             const hotelUuids = hotelBookings.map(booking => booking.hotelUuid);
             const hotelDetails = await fetchHotelsByUUID(hotelUuids)
             const hotelMap = new Map(hotelDetails.data.map(hotel => [hotel.uuid, hotel]));
-            console.log(hotelMap)
-            const transformedHotelEvents = hotelBookings.map((booking) => ({
+            const transformedHotelEvents = hotelBookings
+                .filter(booking => booking.status !== "Canceled")
+                .map((booking) => ({
                 id: booking.hotelId,
                 bookingId: booking.bookingId,
                 date: parseISO(booking.checkInDate),
@@ -76,8 +80,8 @@ const SchedulePage = () => {
                 title: hotelMap.get(booking.hotelUuid)?.name || "Unknown Hotel",
                 image: hotelMap.get(booking.hotelUuid)?.thumbnails?.[0]?.uuid || "/hotel-placeholder.svg",
                 category: "hotel",
+                status: booking.status
             }));
-
             // 
             setEvents([...transformedAttractionEvents, ...transformedHotelEvents]);
         };
@@ -137,6 +141,7 @@ const SchedulePage = () => {
         }
     };
 
+    // 取消事件
     const handleCancelBooking = async (bookingId, category) => {
         if (!window.confirm("Are you sure you want to cancel this booking?")) return;
     
@@ -151,7 +156,6 @@ const SchedulePage = () => {
             console.error("Error canceling booking:", error);
         }
     };
-    
     
     // 上个星期
     const handlePreviousWeek = () => { setSelectedDate(addDays(selectedDate, -7))}
@@ -239,7 +243,9 @@ const SchedulePage = () => {
 
                         <div className="space-y-4">
                             {paginatedEvents.length > 0 ? (
-                                paginatedEvents.map(event => (
+                                paginatedEvents
+                                    .filter(event => event.status !== "Canceled") // 过滤已取消的预订
+                                    .map(event => (
                                     <Card key={event.bookingId} className="p-4">
                                         <div className="flex items-center space-x-4">
                                             <MediaImage uuid={event.image} alt={event.title} fileType={"Small Thumbnail"} className="w-20 h-20 rounded-lg" />
