@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
+import { sendHotelBookingToBackEnd } from "../../../api/hotels.jsx"
 
 const roomTypes = [
   { id: "standard", name: "标准间", price: 1 },
@@ -12,14 +13,43 @@ const roomTypes = [
   { id: "suite", name: "套房", price: 3 },
 ]
 
-export default function BookingModal({ isOpen, onClose }) {
+export default function BookingModal({ uuid, isOpen, onClose }) {
   const [checkIn, setCheckIn] = useState(null)
   const [checkOut, setCheckOut] = useState(null)
   const [roomType, setRoomType] = useState("")
   const [guests, setGuests] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    // usrId uuid checkin checkout roomType guests price
+    const userId = parseInt(localStorage.getItem("userId"), 10);
+
+    const totalNights = differenceInDays(checkOut, checkIn);
+    const totalPrice = roomTypes.find((r) => r.id === roomType).price * totalNights;
+
+    const bookingData = {
+      userId: userId,
+      uuid: uuid,
+      checkInDate: format(checkIn, "yyyy-MM-dd"),
+      checkOutDate: format(checkOut, "yyyy-MM-dd"),
+      roomType: roomType,
+      guests: parseInt(guests, 10),
+      price: 0.0,
+    };
+
+    try {
+      const response = await sendHotelBookingToBackEnd(bookingData);
+      if (response.status === 200) {
+        alert("Booking successful!");
+        onClose();
+      } else {
+        alert("Booking failed: " + response.data);
+      }
+    } catch (error) {
+      console.error("Error booking hotel:", error);
+      alert("Failed to book the hotel. Please try again.");
+    }
+
     console.log({ checkIn, checkOut, roomType, guests })
     onClose()
   }
@@ -115,7 +145,7 @@ export default function BookingModal({ isOpen, onClose }) {
           </div>
 
           {/* 确认预订按钮 */}
-          <Button type="submit" className="w-full text-lg" disabled={!checkIn || !checkOut || !roomType || !guests}>
+          <Button type="submit" onClick={handleSubmit} className="w-full text-lg" disabled={!checkIn || !checkOut || !roomType || !guests}>
             Confirm booking
           </Button>
         </form>

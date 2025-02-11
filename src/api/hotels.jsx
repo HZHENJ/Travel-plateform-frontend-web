@@ -3,6 +3,7 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const API_KEY = import.meta.env.VITE_API_KEY;
 const CONTENT_LANGUAGE = import.meta.env.VITE_CONTENT_LANGUAGE;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 // fetch all hotels data from api
 export const fetchHotels = async (offset = 0, limit = 6) => {
@@ -50,6 +51,15 @@ export const fetchHotelsByUUID = async(uuid) => {
 };
 
 // booking
+// {
+//   "userId": 1,
+//   "uuid": "0013526460d4164465ebd5944feb16279e4",
+//   "checkInDate": "2025-03-10",
+//   "checkOutDate": "2025-03-15",
+//   "roomType": "Deluxe Suite",
+//   "guests": 2,
+//   "price": 0.00
+// }
 export const sendHotelBookingToBackEnd = async (hotelBooking) => {
   try {
     const response = await axios.post(`${BACKEND_URL}/api/hotels/booking`, hotelBooking, {

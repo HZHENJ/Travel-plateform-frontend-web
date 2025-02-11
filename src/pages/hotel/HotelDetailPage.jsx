@@ -216,7 +216,7 @@ const HotelDetailPage = () => {
       <Footer />
 
       {/* 预订模态框 */}
-      <HotelBookingModal hotelName={hotelDetail.name} isOpen={isBookingModalOpen} onClose={closeBookingModal} />
+      <HotelBookingModal uuid={hotelDetail.uuid} hotelName={hotelDetail.name} isOpen={isBookingModalOpen} onClose={closeBookingModal} />
     </div>
   )
 }
