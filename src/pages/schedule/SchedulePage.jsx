@@ -9,8 +9,8 @@ import { Badge } from "../../components/ui/badge"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { fetchUserSchedule } from "../../api/schedule"
 import { fetchUserHotelBookings } from "../../api/schedule"
-import { fetchAttractoionsByUUID } from "../../api/attractions"
-import { fetchHotelsByUUID } from "../../api/hotels"
+import { fetchAttractoionsByUUID, cancelAttractionBooking } from "../../api/attractions"
+import { fetchHotelsByUUID, cancelHotelBooking } from "../../api/hotels"
 import { submitReview } from "../../api/review"
 
 import Navbar from "../../components/layout/Navbar"
@@ -257,7 +257,7 @@ const SchedulePage = () => {
                                                 <Button variant="outline" size="sm" onClick={() => openReviewModal(event)}>
                                                     <Star className="h-4 w-4 text-yellow-500" /> Rate
                                                 </Button>
-                                                <Button variant="destructive" size="sm" onClick={() => handleCancelBooking(event.bookingId)}
+                                                <Button variant="destructive" size="sm" onClick={() => handleCancelBooking(event.bookingId, event.category)}
                                                     disabled={new Date() > event.date}className="ml-auto">
                                                     Cancel
                                                 </Button>

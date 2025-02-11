@@ -71,3 +71,13 @@ export const sendHotelBookingToBackEnd = async (hotelBooking) => {
     console.error("Error Booking Hotel:", error.response ? error.response.data : error.message);
   }
 }
+
+export const cancelHotelBooking = async (bookingId) => {
+  try {
+      const response = await axios.delete(`${BACKEND_URL}/api/hotels/booking/${bookingId}`);
+      return response.data;
+  } catch (error) {
+      console.error("Error canceling hotel booking:", error);
+      throw error;
+  }
+};

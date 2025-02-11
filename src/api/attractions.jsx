@@ -99,3 +99,14 @@ export const sendAttractionBookingToBackEnd = async (attractionBooking) => {
     console.error("Error Booking Attraction:", error.response ? error.response.data : error.message);
   }
 };
+
+// 取消景点预订
+export const cancelAttractionBooking = async (bookingId) => {
+  try {
+      const response = await axios.delete(`${BACKEND_URL}/api/attractions/booking/${bookingId}`);
+      return response.data;
+  } catch (error) {
+      console.error("Error canceling attraction booking:", error);
+      throw error;
+  }
+}
