@@ -48,3 +48,15 @@ export const fetchHotelsByUUID = async(uuid) => {
     throw error;
   }
 };
+
+// booking
+export const sendHotelBookingToBackEnd = async (hotelBooking) => {
+  try {
+    const response = await axios.post(`${BACKEND_URL}/api/hotels/booking`, hotelBooking, {
+      headers: { "Content-Type": "application/json" }
+    });
+    return response;
+  } catch (error) {
+    console.error("Error Booking Hotel:", error.response ? error.response.data : error.message);
+  }
+}
