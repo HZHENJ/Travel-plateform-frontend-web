@@ -1,4 +1,4 @@
-import AppRoutes from "./routes/customer";
+import AppRoutes from "./routes/Customer";
 import { AuthProvider } from "./context/AuthContext";
 
 const App = () => {

@@ -62,7 +62,7 @@ const SchedulePage = () => {
                     time: format(parseISO(booking.visitTime), "hh:mm a"),
                     title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
                     image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
-                    category: "attraction",
+                    category: "Attraction",
                     status: booking.status
             }));
 
@@ -79,7 +79,7 @@ const SchedulePage = () => {
                 time: "Check-in",
                 title: hotelMap.get(booking.hotelUuid)?.name || "Unknown Hotel",
                 image: hotelMap.get(booking.hotelUuid)?.thumbnails?.[0]?.uuid || "/hotel-placeholder.svg",
-                category: "hotel",
+                category: "Hotel",
                 status: booking.status
             }));
             // 
@@ -120,19 +120,19 @@ const SchedulePage = () => {
     };
 
     // 提交评分
-    const handleReviewSubmit = async () => {
+    const handleReviewSubmit = async ({ category }) => {
         if (!reviewText.trim()) return alert("Please enter a review.");
 
         try {
             const reviewData = {
                 userId,
-                itemType: "Attraction",
+                itemType: category,
                 itemId: selectedEvent.id, // attraction id
                 bookingId: selectedEvent.bookingId,
                 rating,
                 comment: reviewText
             };
-
+            console.log(reviewData)
             await submitReview(reviewData);
             setReviewModal(false);
             alert("Review submitted successfully!");
@@ -146,7 +146,7 @@ const SchedulePage = () => {
         if (!window.confirm("Are you sure you want to cancel this booking?")) return;
     
         try {
-            if (category === "hotel") {
+            if (category === "Hotel") {
                 await cancelHotelBooking(bookingId);
             } else {
                 await cancelAttractionBooking(bookingId);
@@ -166,9 +166,9 @@ const SchedulePage = () => {
     // 设置类别颜色
     const getCategoryColor = (category) => {
         switch (category) {
-        case "attraction":
+        case "Attraction":
             return "bg-blue-100 text-blue-800"
-        case "hotel":
+        case "Hotel":
             return "bg-green-100 text-green-800"
         default:
             return "bg-gray-100 text-gray-800"
@@ -301,7 +301,7 @@ const SchedulePage = () => {
                                         className="w-full p-2 border rounded"
                                     />
                                     <DialogFooter>
-                                        <Button onClick={handleReviewSubmit}>Submit</Button>
+                                        <Button onClick={() => handleReviewSubmit({category: selectedEvent?.category})}>Submit</Button>
                                         <Button variant="secondary" onClick={() => setReviewModal(false)}>Cancel</Button>
                                     </DialogFooter>
                                 </DialogContent>
