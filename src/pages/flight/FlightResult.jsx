@@ -6,7 +6,6 @@ import axios from 'axios';
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 
-
 export default function FlightResults() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,6 +14,7 @@ export default function FlightResults() {
   const [flights, setFlights] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   useEffect(() => {
     axios.post('http://localhost:8080/api/flights', {
       from,
@@ -41,7 +41,6 @@ export default function FlightResults() {
         setLoading(false);
       });
   }, [from, to, date, passengers]);
-  
 
   if (loading) return <div className="text-center mt-10">Loading...</div>;
   if (error) return <div className="text-center mt-10 text-red-600">Error fetching flights!</div>;
@@ -56,7 +55,7 @@ export default function FlightResults() {
             <div 
               key={flight.id}
               className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate(`/detail/${flight.id}`)}
+              onClick={() => navigate(`/detail/${flight.id}`, { state: { passengers } })}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -83,7 +82,7 @@ export default function FlightResults() {
                     className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/detail/${flight.id}`);
+                      navigate(`/detail/${flight.id}`, { state: { passengers,price:Number(flight.price) } });
                     }}
                   >
                     Select

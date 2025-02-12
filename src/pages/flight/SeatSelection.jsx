@@ -1,6 +1,7 @@
-// SeatSelection.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 
 const generateSeats = () => {
   const rows = [];
@@ -9,49 +10,85 @@ const generateSeats = () => {
     for (let j = 1; j <= 6; j++) {
       row.push({
         id: `${i}-${String.fromCharCode(64 + j)}`,
-        available: Math.random() > 0.3
+        available: Math.random() > 0.3, 
       });
-    }   
+    }
     rows.push(row);
   }
   return rows;
 };
 
 export default function SeatSelection() {
+  const type = 'Flight';
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { id, passengers,price } = location.state || {};  
+  const maxSeats = passengers || 0;  
   const [seats] = useState(generateSeats());
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const navigate = useNavigate();
+
+  const totalprice = price * passengers
+
+  useEffect(() => {
+    setSelectedSeats([]);
+  }, [passengers]);
 
   const toggleSeat = (seatId) => {
-    setSelectedSeats(prev => 
-      prev.includes(seatId) 
-        ? prev.filter(id => id !== seatId) 
-        : [...prev, seatId]
-    );
+    if (selectedSeats.includes(seatId)) {
+      setSelectedSeats(prev => prev.filter(id => id !== seatId));
+    } else if (selectedSeats.length < maxSeats) {
+      setSelectedSeats(prev => [...prev, seatId]);
+    }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 min-h-screen">
-      <h2 className="text-2xl font-bold mb-6 text-blue-600">Select Seats</h2>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="mb-8">
-          <div className="w-full h-16 bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-            <span className="text-gray-600">Cabin</span>
+
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Navbar />
+         <div className="max-w-5xl mx-auto p-8 min-h-screen flex justify-center items-center">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+        <h2 className="text-3xl font-semibold mb-8 text-blue-600 text-center">Select Your Seats</h2>
+        <div className="mb-12">
+          <div className="w-full h-16 bg-blue-200 rounded-lg mb-8 flex items-center justify-center">
+            <span className="text-gray-600 text-xl">Seat Layout</span>
           </div>
-          
+
+          {/* Seat Rows */}
           {seats.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex justify-center gap-4 mb-4">
-              {row.map((seat, seatIndex) => (
+            <div key={rowIndex} className="flex justify-center mb-8 items-center space-x-4">  {/* space-x-4 adds space between seats */}
+              <div className="w-12 flex items-center justify-center font-semibold text-gray-600">{rowIndex + 1}</div>
+              
+              {/* Left seats */}
+              {row.slice(0, 3).map((seat) => (
                 <button
                   key={seat.id}
                   onClick={() => seat.available && toggleSeat(seat.id)}
-                  className={`w-12 h-12 rounded-lg flex items-center justify-center
-                    ${seat.available 
+                  className={`w-14 h-14 rounded-lg flex items-center justify-center text-lg
+                    ${seat.available
                       ? selectedSeats.includes(seat.id)
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 hover:bg-blue-200'
-                      : 'bg-red-200 cursor-not-allowed'}
-                    ${seatIndex === 2 && 'mr-8'}`}
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white hover:bg-blue-200 border-2 border-blue-300'
+                      : 'bg-red-300 cursor-not-allowed'}`}
+                  disabled={!seat.available}
+                >
+                  {seat.id.split('-')[1]}
+                </button>
+              ))}
+
+              {/* Aisle */}
+              <div className="w-10 flex items-center justify-center text-gray-400">|</div>
+
+              {/* Right seats */}
+              {row.slice(3).map((seat) => (
+                <button
+                  key={seat.id}
+                  onClick={() => seat.available && toggleSeat(seat.id)}
+                  className={`w-14 h-14 rounded-lg flex items-center justify-center text-lg
+                    ${seat.available
+                      ? selectedSeats.includes(seat.id)
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white hover:bg-blue-200 border-2 border-blue-300'
+                      : 'bg-red-300 cursor-not-allowed'}`}
                   disabled={!seat.available}
                 >
                   {seat.id.split('-')[1]}
@@ -61,11 +98,11 @@ export default function SeatSelection() {
           ))}
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="font-semibold mb-2">Selected Seats:</h3>
-          <div className="flex flex-wrap gap-2">
+        <div className="bg-blue-100 p-6 rounded-lg mb-8">
+          <h3 className="font-semibold text-lg mb-4">Selected Seats:</h3>
+          <div className="flex flex-wrap gap-4">
             {selectedSeats.map(seat => (
-              <span key={seat} className="bg-blue-100 text-blue-800 px-3 py-1 rounded">
+              <span key={seat} className="bg-blue-200 text-blue-800 px-4 py-2 rounded-lg text-lg">
                 {seat}
               </span>
             ))}
@@ -74,13 +111,15 @@ export default function SeatSelection() {
         </div>
 
         <button
-          onClick={() => navigate('/payment')}
-          className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 w-full transition-colors"
+          onClick={() => navigate('/payment', { state: { selectedSeats,id,type,totalprice } })}
+          className="bg-blue-600 text-white px-10 py-4 rounded-lg hover:bg-blue-700 w-full transition-colors"
           disabled={selectedSeats.length === 0}
         >
           Confirm Seats ({selectedSeats.length} seats)
         </button>
       </div>
+    </div>
+    <Footer/>
     </div>
   );
 }
