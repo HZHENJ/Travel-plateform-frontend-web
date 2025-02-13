@@ -1,65 +1,130 @@
-import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { useState, useEffect } from 'react'
+import PropTypes from 'prop-types'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+const Calendar = ({ onDateSelect, visitDates = [] }) => {
+    const [currentDate, setCurrentDate] = useState(new Date())
+    const [markedDates, setMarkedDates] = useState(new Set())
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}) {
-  return (
-    (<DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
-        ),
-      }}
-      {...props} />)
-  );
+    useEffect(() => {
+        // Convert visitDates to a Set of date strings for easy lookup
+        const dates = new Set(
+            visitDates.map((date) => new Date(date).toDateString())
+        )
+        setMarkedDates(dates)
+    }, [visitDates])
+
+    const getDaysInMonth = (date) => {
+        return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
+    }
+
+    const getFirstDayOfMonth = (date) => {
+        return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
+    }
+
+    const previousMonth = () => {
+        setCurrentDate(
+            new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+        )
+    }
+
+    const nextMonth = () => {
+        setCurrentDate(
+            new Date(currentDate.getFullYear(), currentDate.getMonth() + 1)
+        )
+    }
+
+    const isVisitDate = (day) => {
+        const date = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            day
+        ).toDateString()
+        return markedDates.has(date)
+    }
+
+    const handleDateClick = (day) => {
+        const selectedDate = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            day
+        )
+        onDateSelect?.(selectedDate)
+    }
+
+    const renderCalendar = () => {
+        const daysInMonth = getDaysInMonth(currentDate)
+        const firstDay = getFirstDayOfMonth(currentDate)
+        const days = []
+
+        for (let i = 0; i < firstDay; i++) {
+            days.push(<div key={`empty-${i}`} className="h-8" />)
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const isVisit = isVisitDate(day)
+            days.push(
+                <div
+                    key={day}
+                    onClick={() => handleDateClick(day)}
+                    className={`flex h-8 cursor-pointer items-center justify-center rounded-full text-sm ${isVisit ? 'bg-teal-100 text-teal-800 hover:bg-teal-200' : 'hover:bg-gray-100'}`}
+                >
+                    {day}
+                </div>
+            )
+        }
+
+        return days
+    }
+
+    return (
+        <div className="w-full">
+            <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-base font-medium text-gray-900">
+                    {currentDate.toLocaleString('default', {
+                        month: 'long',
+                        year: 'numeric'
+                    })}
+                </h2>
+                <div className="flex gap-2">
+                    <button
+                        onClick={previousMonth}
+                        className="rounded-full p-1 hover:bg-gray-100"
+                    >
+                        <ChevronLeftIcon className="h-5 w-5 text-gray-600" />
+                    </button>
+                    <button
+                        onClick={nextMonth}
+                        className="rounded-full p-1 hover:bg-gray-100"
+                    >
+                        <ChevronRightIcon className="h-5 w-5 text-gray-600" />
+                    </button>
+                </div>
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+                {daysOfWeek.map((day) => (
+                    <div
+                        key={day}
+                        className="flex h-8 items-center justify-center text-xs font-medium text-gray-500"
+                    >
+                        {day}
+                    </div>
+                ))}
+                {renderCalendar()}
+            </div>
+        </div>
+    )
 }
-Calendar.displayName = "Calendar"
 
-export { Calendar }
+Calendar.propTypes = {
+    onDateSelect: PropTypes.func,
+    visitDates: PropTypes.arrayOf(PropTypes.string)
+}
+
+Calendar.defaultProps = {
+    onDateSelect: () => {},
+    visitDates: []
+}
+
+export default Calendar
