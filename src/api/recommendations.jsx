@@ -11,3 +11,25 @@ export const fetchPersonalizedRecommendations = async (userId) => {
     return [];
   }
 };
+
+
+export const fetchPopularRecommendations = async () => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/recommendations/famous`);
+    return response.data;
+  } catch (error) {
+    console.error("famous", error);
+    return [];
+  }
+};
+
+// checkIfNewUser
+export const checkIfNewUser = async (userId) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/api/auth/${userId}/is-new-attraction-user`);
+    return response.data;
+  } catch (error) {
+    console.error("famous", error);
+    return [];
+  }
+};

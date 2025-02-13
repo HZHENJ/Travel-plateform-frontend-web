@@ -6,6 +6,7 @@ import Footer from "../components/layout/Footer";
 import { fetchPersonalizedRecommendations } from "../api/recommendations"
 
 const Home = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [visibleItems, setVisibleItems] = useState(3);
 
   const [recommendedAttractions, setRecommendedAttractions] = useState([]);
