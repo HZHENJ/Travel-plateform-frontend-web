@@ -69,6 +69,10 @@ const AttractionDetailPage = () => {
   const openBookingModal = useCallback(() => setIsBookingModalOpen(true), [])
   const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), [])
 
+  const loadMoreReviews = () => {
+    setVisibleReviews(prev => prev + 3);  // 每次显示多 3 条评论
+  };
+
   const navigate = useNavigate();
 
   // back to Hotels page
@@ -81,17 +85,19 @@ const AttractionDetailPage = () => {
       // fetch data
       try {
         const reviewsData = await fetchReviewRatingByUUID(uuid); // 这里注意需要有数据库才可以！！！
-        setReviews(reviewsData)
+        const filteredReviews = reviewsData.filter(review => review.status === "show");
+        setReviews(filteredReviews)
       } catch (error) {
         console.error("reviewsData - no uuid", error)
       }
 
+      // 
       try {
         const attractionData = await fetchAttractoionsByUUID(uuid);
         const attraction = Array.isArray(attractionData.data) && attractionData.data.length > 0 ? attractionData.data[0] : null;
         setAttractions(attraction)
       } catch (error) {
-        console.error("attractionData", error)
+        console.error("attraction", error)
       }
     };
     getData();
@@ -99,7 +105,7 @@ const AttractionDetailPage = () => {
 
   // debug
   // console.log("attractionDetail detail:", attractionDetail)
-  console.log("Reviews:", reviews)
+  // console.log("Reviews:", reviews)
 
   // UI
   if (!attractionDetail) {
@@ -157,6 +163,7 @@ const AttractionDetailPage = () => {
               <Button onClick={openBookingModal} className="bg-blue-500">Book Now</Button>
             </div>
 
+            {/* address */}
             <p className="flex items-center text-gray-600 mb-4">
               <MapPin className="w-5 h-5 mr-2" />
               {attractionDetail.address.streetName}, {attractionDetail.address.postalCode}
@@ -262,10 +269,7 @@ const AttractionDetailPage = () => {
           </div>
           {visibleReviews < reviews.length && (
             <div className="mt-4 text-center">
-              <button
-                onClick={loadMoreReviews}
-                className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-              >
+              <button onClick={loadMoreReviews} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300">
                 Load More Reviews
               </button>
             </div>

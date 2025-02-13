@@ -2,11 +2,11 @@ import { useEffect, useState, useCallback } from "react"
 import { ArrowLeft, ArrowRight, Star, MapPin, Clock, Ticket, Navigation, Mail, Globe, Phone } from "lucide-react"
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
-
+import { format } from 'date-fns';
 import { Button } from "@/components/ui/button"
 
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchHotelsByUUID } from "../../api/hotels";
+import { fetchHotelsByUUID, fetchReviewRatingByUUID } from "../../api/hotels";
 
 import HotelBookingModal from "../../components/common/hotel/BookingModal"; 
 
@@ -59,11 +59,17 @@ const ImageCarousel = ({ images }) => {
   )
 }
 
+// main page
 const HotelDetailPage = () => {
   const { uuid } = useParams();
   const [hotelDetail, setHotels] = useState(null)
+  const [reviews, setReviews] = useState({})
   const [visibleReviews, setVisibleReviews] = useState(3)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+
+  const loadMoreReviews = () => {
+    setVisibleReviews(prev => prev + 3);  // 每次显示多 3 条评论
+  };
 
   const openBookingModal = useCallback(() => setIsBookingModalOpen(true), [])
   const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), [])
@@ -77,18 +83,30 @@ const HotelDetailPage = () => {
 
   useEffect(() => {
     const getData = async () => {
+      // fetch review
       try {
-        const response = await fetchHotelsByUUID(uuid);
-        const hotel = Array.isArray(response.data) && response.data.length > 0 ? response.data[0] : null;
+        const reviewsData = await fetchReviewRatingByUUID(uuid); // 这里注意需要有数据库才可以！！！
+        const filteredReviews = reviewsData.filter(review => review.status === "show");
+        setReviews(filteredReviews)
+      } catch (error) {
+        console.error("reviewsData - no uuid", error)
+      }
+
+      // fetch hotel
+      try {
+        const hotelData = await fetchHotelsByUUID(uuid);
+        const hotel = Array.isArray(hotelData.data) && hotelData.data.length > 0 ? hotelData.data[0] : null;
         setHotels(hotel)
       } catch (error) {
-        console.error("HotelDetail", error)
+        console.error("hotel", error)
       }
     };
     getData();
   }, [uuid]);
 
-  console.log("hotel detail:", hotelDetail)
+  // debug
+  console.log("review:", reviews)
+  // console.log("hotel detail:", hotelDetail)
 
   // UI
   if (!hotelDetail) {
@@ -122,6 +140,7 @@ const HotelDetailPage = () => {
                 </div>
                 <Button onClick={openBookingModal} className="bg-blue-500">Book Now</Button>
               </div>
+
               {/* address */}
               <p className="flex items-center text-gray-600 mb-4">
                 <MapPin className="w-5 h-5 mr-2" />
@@ -138,7 +157,6 @@ const HotelDetailPage = () => {
               </div>
               <h2 className="text-xl font-semibold mb-2">Description</h2>
               <div className="text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: hotelDetail.body }}></div>
-              {/* <p className="text-gray-700 mb-6">{hotelDetail.description}</p> */}
               
               <h2 className="text-xl font-semibold mb-2">Nearest MRT Station</h2>
               <p className="flex items-center text-gray-700 mb-6">
@@ -187,25 +205,22 @@ const HotelDetailPage = () => {
             <h2 className="text-2xl font-bold mb-4">Recent Reviews</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {
-                hotelDetail.reviews.length > 0 ? 
-                hotelDetail.reviews.slice(0, visibleReviews).map((review, index) => (
+                reviews.length > 0 ? 
+                reviews.slice(0, visibleReviews).map((review, index) => (
                 <div key={index} className="bg-white rounded-lg shadow-md p-4">
                   <div className="flex items-center mb-2">
                     <Star className="text-yellow-400 w-5 h-5" />
                     <span className="ml-1 font-semibold">{review.rating}</span>
                   </div>
                   <p className="text-gray-700 mb-2">{review.comment}</p>
-                  <p className="text-sm text-gray-500">- {review.user}</p>
+                  <p className="text-sm text-gray-500">{format(new Date(review.updatedAt), 'MMM d, yyyy HH:mm')}</p>
                 </div>
               )) : <p>No Reviews</p>
             }
             </div>
-            {visibleReviews < hotelDetail.reviews.length && (
+            {visibleReviews < reviews.length && (
               <div className="mt-4 text-center">
-                <button
-                  onClick={loadMoreReviews}
-                  className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
-                >
+                <button onClick={loadMoreReviews}className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300">
                   Load More Reviews
                 </button>
               </div>
@@ -216,7 +231,12 @@ const HotelDetailPage = () => {
       <Footer />
 
       {/* 预订模态框 */}
-      <HotelBookingModal uuid={hotelDetail.uuid} hotelName={hotelDetail.name} isOpen={isBookingModalOpen} onClose={closeBookingModal} />
+      <HotelBookingModal 
+        uuid={hotelDetail.uuid} 
+        hotelName={hotelDetail.name} 
+        isOpen={isBookingModalOpen} 
+        onClose={closeBookingModal} 
+      />
     </div>
   )
 }

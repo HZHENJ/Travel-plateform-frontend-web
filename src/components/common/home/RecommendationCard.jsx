@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
-import MediaImage from "../media/MediaImage";
 import { fetchAttractoionsByUUID } from "../../../api/attractions";
+import { useNavigate } from "react-router-dom";
+import MediaImage from "../media/MediaImage";
 
 
 const RecommendationCard = ({item}) => {
   if (!item) return null;
+
+  const navigate = useNavigate(); 
+  const handleClick = () => {
+    navigate(`/attractions/${item.uuid}`); // 跳转到详情页
+  };
 
   const [attractionDetail, setAttractions] = useState(null);
 
@@ -28,7 +34,8 @@ const RecommendationCard = ({item}) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105 h-96 w-72 mx-auto flex flex-col">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105 hover:z-50 h-96 w-72 mx-auto flex flex-col"
+        onClick={handleClick}>
       {/* image area */}
       <div className="w-full h-48 overflow-hidden">
         <MediaImage uuid={attractionDetail.thumbnails[0].uuid} fileType={"Small Thumbnail"}/>

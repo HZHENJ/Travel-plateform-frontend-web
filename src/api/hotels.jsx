@@ -81,3 +81,14 @@ export const cancelHotelBooking = async (bookingId) => {
       throw error;
   }
 };
+
+// fetch review & rating from backend
+export const fetchReviewRatingByUUID = async(uuid) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/api/hotels/${uuid}/reviews`)
+    return response.data;
+  } catch (error) {
+    console.error("fetchReviewRatingByUUID", error);
+    throw error;
+  }
+};
