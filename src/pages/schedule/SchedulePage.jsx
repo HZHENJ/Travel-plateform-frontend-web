@@ -43,47 +43,81 @@ const SchedulePage = () => {
             if (!userId) return;
 
             // 1. 并行获取AttractionBooking & HotelBooking
+            // const [bookings, hotelBookings] = await Promise.all([
+            //     fetchUserSchedule(userId),
+            //     fetchUserHotelBookings(userId),
+            // ]);
+
+            // 1. 并行获取 AttractionBooking & HotelBooking
             const [bookings, hotelBookings] = await Promise.all([
-                fetchUserSchedule(userId),
-                fetchUserHotelBookings(userId),
+                fetchUserSchedule(userId).catch(error => {
+                    // console.error("Error fetching attraction bookings:", error);
+                    return []; // 返回空数组，防止崩溃
+                }),
+                fetchUserHotelBookings(userId).catch(error => {
+                    // console.error("Error fetching hotel bookings:", error);
+                    return []; // 返回空数组，防止崩溃
+                }),
             ]);
+
+            console.log("Bookings:", bookings); // 👀 打印返回的数据类型
+            console.log("HotelBookings:", hotelBookings);
+            
+            // 确保 `bookings` 和 `hotelBookings` 都是数组
+            const validBookings = Array.isArray(bookings) ? bookings : [];
+            const validHotelBookings = Array.isArray(hotelBookings) ? hotelBookings : [];
 
             // 处理景点预订数据
             const attractionUuids = bookings.map(booking => booking.attractionUuid);
             const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
             const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
 
-            const transformedAttractionEvents = bookings
-                .filter(booking => booking.status !== "Canceled")
-                .map((booking) => ({
-                    id: booking.attractionId,
-                    bookingId: booking.bookingId,
-                    date: parseISO(booking.visitDate),
-                    time: format(parseISO(booking.visitTime), "hh:mm a"),
-                    title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
-                    image: attractionMap.get(booking.attractionUuid)?.thumbnails[0].uuid || "/placeholder.svg",
-                    category: "Attraction",
-                    status: booking.status
-            }));
+            // 处理景点预订数据
+            let transformedAttractionEvents = [];
+            if (validBookings.length > 0) {
+                const attractionUuids = validBookings.map(booking => booking.attractionUuid);
+                const attractionDetails = await fetchAttractoionsByUUID(attractionUuids);
+                const attractionMap = new Map(attractionDetails.data.map(attraction => [attraction.uuid, attraction]));
+
+                transformedAttractionEvents = validBookings
+                    .filter(booking => booking.status !== "Canceled")
+                    .map((booking) => ({
+                        id: booking.attractionId,
+                        bookingId: booking.bookingId,
+                        date: parseISO(booking.visitDate),
+                        time: format(parseISO(booking.visitTime), "hh:mm a"),
+                        title: attractionMap.get(booking.attractionUuid)?.name || "Unknown",
+                        image: attractionMap.get(booking.attractionUuid)?.thumbnails?.[0]?.uuid || "/placeholder.svg",
+                        category: "Attraction",
+                        status: booking.status
+                    }));
+            }
 
             // 处理酒店预订数据
-            const hotelUuids = hotelBookings.map(booking => booking.hotelUuid);
-            const hotelDetails = await fetchHotelsByUUID(hotelUuids)
-            const hotelMap = new Map(hotelDetails.data.map(hotel => [hotel.uuid, hotel]));
-            const transformedHotelEvents = hotelBookings
-                .filter(booking => booking.status !== "Canceled")
-                .map((booking) => ({
-                id: booking.hotelId,
-                bookingId: booking.bookingId,
-                date: parseISO(booking.checkInDate),
-                time: "Check-in",
-                title: hotelMap.get(booking.hotelUuid)?.name || "Unknown Hotel",
-                image: hotelMap.get(booking.hotelUuid)?.thumbnails?.[0]?.uuid || "/hotel-placeholder.svg",
-                category: "Hotel",
-                status: booking.status
-            }));
-            // 
-            setEvents([...transformedAttractionEvents, ...transformedHotelEvents]);
+            let transformedHotelEvents = [];
+            if (validHotelBookings.length > 0) {
+                const hotelUuids = validHotelBookings.map(booking => booking.hotelUuid);
+                const hotelDetails = await fetchHotelsByUUID(hotelUuids);
+                const hotelMap = new Map(hotelDetails.data.map(hotel => [hotel.uuid, hotel]));
+
+                transformedHotelEvents = validHotelBookings
+                    .filter(booking => booking.status !== "Canceled")
+                    .map((booking) => ({
+                        id: booking.hotelId,
+                        bookingId: booking.bookingId,
+                        date: parseISO(booking.checkInDate),
+                        time: "Check-in",
+                        title: hotelMap.get(booking.hotelUuid)?.name || "Unknown Hotel",
+                        image: hotelMap.get(booking.hotelUuid)?.thumbnails?.[0]?.uuid || "/hotel-placeholder.svg",
+                        category: "Hotel",
+                        status: booking.status
+                    }));
+            }
+            // **合并事件，不管 bookins 或 hotelBookings 是否为空**
+            const allEvents = [...transformedAttractionEvents, ...transformedHotelEvents];
+
+            console.log("Final Events:", allEvents); // Debugging output
+            setEvents(allEvents);
         };
 
         // 判断用户
