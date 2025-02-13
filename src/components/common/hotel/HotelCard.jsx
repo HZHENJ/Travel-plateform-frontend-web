@@ -5,15 +5,25 @@ const HotelCard = ({ hotel }) => {
   if (!hotel) return null;
 
   const navigate = useNavigate(); // 使用 useNavigate 实现导航
+  const isDisabled = hotel.price === "No Price"; // 判断是否无价格
 
   const handleCardClick = () => {
-    navigate(`/hotels/${hotel.uuid}`); // 跳转到对应的 HotelDetailPage
+    if (!isDisabled) {
+      navigate(`/hotels/${hotel.uuid}`); // 仅允许有价格的酒店跳转
+    }
   };
 
   return (
     <div 
       onClick={handleCardClick}
-      className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+      className={`relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 transform ${
+        isDisabled 
+          ? "opacity-50 grayscale cursor-not-allowed hover:scale-100"  // 无价格的酒店变灰色，不能点击
+          : "hover:scale-105 hover:shadow-xl cursor-pointer" // 正常酒店可点击
+      }`}
+      style={isDisabled ? { pointerEvents: "none" } : {}} // 彻底禁用点击事件
+    >
+        
         {/* image area */}
         <div className="w-full h-48 overflow-hidden">
           <MediaImage uuid={hotel.image} fileType={"Small Thumbnail"}/>
@@ -30,7 +40,6 @@ const HotelCard = ({ hotel }) => {
             <span className="ml-1">{hotel.rating}</span>
           </div>
           <p className="text-lg font-bold mb-2">{hotel.price}</p>
-          {/* <p className="text-sm text-gray-600 mb-2 line-clamp-2">{hotel.description}</p> */}
 
           {/* amenities area */}
           <div className="flex flex-wrap">

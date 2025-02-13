@@ -13,7 +13,7 @@ export const fetchHotels = async (offset = 0, limit = 6) => {
       params: { 
         offset, 
         limit, 
-        dataset: "accommodation" 
+        dataset: "accommodation",
       },
       headers: {
         "X-API-Key": API_KEY,
