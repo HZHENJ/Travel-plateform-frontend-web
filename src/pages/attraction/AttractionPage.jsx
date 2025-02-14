@@ -5,7 +5,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import Pagination from "../../components/common/Pagination";
 import AttractionCard from "../../components/common/attraction/AttractionCard"
-import { fetchAttraction } from "../../api/attractions";
+import { fetchAttraction, fetchReviewStatsByUUID } from "../../api/attractions";
 
 const AttractionPage = () => {
 
@@ -16,37 +16,59 @@ const AttractionPage = () => {
     const attractionPrePage = 6
     const offset = (currentPage - 1) * attractionPrePage
 
-    // fetched attraction data from api
     const getData = async () => {
         try {
-            const response = await fetchAttraction(offset, attractionPrePage)
-            console.log("API Data:", response.data);
+            const response = await fetchAttraction(offset, attractionPrePage);
             if (response && response.data) {
-                // transform the data 
-                const newAttractions = transformAttractions(response.data.data)
+                // 解析景点数据
+                let newAttractions = transformAttractions(response.data.data);
+    
+                // 获取所有景点的 UUID
+                const uuids = newAttractions.map(attraction => attraction.uuid);
+    
+                // 批量获取评分
+                const ratings = await Promise.all(
+                    uuids.map(async (uuid) => {
+                        try {
+                            const ratingResponse = await fetchReviewStatsByUUID(uuid);
+                            console.log(ratingResponse)
+                            return {
+                                averageRating: ratingResponse?.data?.averageRating || 0, // 默认评分 0
+                                totalReviews: ratingResponse?.data?.totalReviews || 0
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching rating for ${uuid}:`, error);
+                            return 0; // 出错时返回默认评分
+                        }
+                    })
+                );
+    
+                // 将评分合并到景点数据中
+                newAttractions = newAttractions.map((attraction, index) => ({
+                    ...attraction,
+                    rating: ratings[index].averageRating,
+                    totalReviews: ratings[index].totalReviews
+                }));
+    
+                // 更新状态
                 setAttraction(newAttractions);
-                // console.log("Attractions", newAttractions)
-                // get total pages
                 setTotalPages(Math.ceil(response.data.totalRecords / attractionPrePage));
             }
         } catch (error) {
-            console.log("Error", error)
+            console.log("Error", error);
         }
-    }
-
-    //  
+    };
+    
     useEffect(() => {
         getData();
     }, [currentPage])
-
-    console.log("attractions", attractions)
 
     // parse the data from the api
     const transformAttractions = (data) => {
         return data.map((attraction) => ({
             uuid: attraction.uuid,
             name: attraction.name || "Unknow Hotel",
-            address: attraction.address ? `${attraction.address.block || ""} ${attraction.address.streetName || ""}, ${attraction.address.postalCode || ""}`: "Unknow address",
+            address: attraction.address ? `${attraction.address.block || ""} ${attraction.address.streetName || ""} ${attraction.address.postalCode || ""}`: "Unknow address",
             description: attraction.description || "No description available",
             type: attraction.categoryDescription || "Unknown",
             tags: attraction.tags || [],
@@ -58,8 +80,9 @@ const AttractionPage = () => {
             contactNumber: attraction.contact?.primaryContactNo || "No contact available",
             pricing: attraction.pricing?.others || "Price not available",
             website: attraction.officialWebsite || "No website available",
-            rating: attraction.rating || 0,
-            image: (attraction.thumbnails && attraction.thumbnails.length > 0) ? attraction.thumbnails[0].uuid: "101bc4fab99f6d6476d9fc609a50c20ebc6", 
+            rating: 0,
+            totalReviews: 0,
+            image: (attraction.thumbnails && attraction.thumbnails.length > 0) ? attraction.thumbnails[0].uuid: "/images/404.jpg", 
             ticketRequired: attraction.ticketed === "Y",
             nearestMrt: attraction.nearestMrtStation || "Not specified",
         }));

@@ -62,6 +62,16 @@ export const fetchReviewRatingByUUID = async(uuid) => {
   }
 };
 
+export const fetchReviewStatsByUUID = async(uuid) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/reviews/attraction/${uuid}`)
+    return response;
+  } catch (error) {
+    console.error("fetchReviewStatsByUUID", error);
+    throw error;
+  }
+}
+
 // send transformed attraction data to backend
 export const sendTransformedAttractionDataToBackEnd = async(attractions) => {
   try {
