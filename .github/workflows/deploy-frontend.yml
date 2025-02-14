@@ -69,13 +69,16 @@ jobs:
 
             # 强制删除已存在的 `frontend-web` 容器（无论是否运行）
             if [ "$(docker ps -aq -f name=frontend-web)" ]; then
-              echo "🔴 删除旧的 frontend-web 容器..."
+              echo "删除旧的 frontend-web 容器..."
               docker stop frontend-web || true
               docker rm frontend-web
             else
-              echo "✅ 没有需要删除的 frontend-web 容器"
+              echo "没有需要删除的 frontend-web 容器"
             fi
 
             # 运行新容器，使用 Nginx 代理前端
             echo "🚀 启动新容器..."
-            docker run -d --name frontend-web -p 80:80 hzhenj/frontend-web:latest
+            docker run -d --name frontend-web -p 8081:8081 hzhenj/frontend-web:latest
+
+            # 重启 Nginx 以应用代理规则
+            sudo systemctl restart nginx
