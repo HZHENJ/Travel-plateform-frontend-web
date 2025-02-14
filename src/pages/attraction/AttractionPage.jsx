@@ -5,7 +5,7 @@ import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import Pagination from "../../components/common/Pagination";
 import AttractionCard from "../../components/common/attraction/AttractionCard"
-import { fetchAttraction } from "../../api/attractions";
+import { fetchAttraction, getAttractionRating } from "../../api/attractions";
 
 const AttractionPage = () => {
 
@@ -24,6 +24,13 @@ const AttractionPage = () => {
             if (response && response.data) {
                 // transform the data 
                 const newAttractions = transformAttractions(response.data.data)
+
+                const res_Rating = await Promise.all(newAttractions.map(attraction => getAttractionRating(attraction.uuid)))
+
+                newAttractions.map((attraction, index) => ({
+                    ...attraction,
+                    rating: res_Rating[index] || attraction.rating
+                }))
                 setAttraction(newAttractions);
                 // console.log("Attractions", newAttractions)
                 // get total pages

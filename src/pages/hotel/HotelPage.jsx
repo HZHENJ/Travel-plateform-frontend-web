@@ -1,71 +1,79 @@
-import {} from "lucide-react"
 import { useState, useEffect } from "react"
-import { fetchHotels } from "../../api/hotels"
-
+import { fetchHotels, getHotelRating } from "../../api/hotels"
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 import HotelCard from "../../components/common/hotel/HotelCard"
 import Pagination from "../../components/common/Pagination";
 
-// 
 const HotelPage = () => {
-  const [hotels, setHotels] = useState([]) // save the data fetched from the API
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(0)
+  const [hotels, setHotels] = useState([]); // 保存从 API 获取的数据
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const hotelsPerPage = 6
-  const offset = (currentPage - 1) * hotelsPerPage
+  const hotelsPerPage = 6;
+  const offset = (currentPage - 1) * hotelsPerPage;
 
   useEffect(() => {
     const getData = async () => {
       try {
         const response = await fetchHotels(offset, hotelsPerPage);
+
         if (response && response.data) {
-          console.log(response.data.data)
-          // 1.transform the data
+          console.log(response.data.data);
+          // 1. transform the data
           let newHotels = transformHotels(response.data.data);
-          // 2. 过滤掉没有价格的酒店
-          // newHotels = newHotels.filter(hotel => hotel.price && hotel.price !== "No Price");
+          
+          // 2. 获取所有酒店的评分
+          const ratings = await Promise.all(newHotels.map(hotel =>
+            getHotelRating(hotel.uuid)
+          ));
+
+          // 3. 将评分赋值给对应的酒店
+          newHotels = newHotels.map((hotel, index) => ({
+            ...hotel,
+            rating: ratings[index] || hotel.rating, // 如果没有评分，保持原来的 rating
+          }));
+
           setHotels(newHotels);
-          // 3.get total pages
+
+          // 4. 获取总页数
           setTotalPages(Math.ceil(response.data.totalRecords / hotelsPerPage));
-        } 
+        }
       } catch (error) {
         console.error("Error", error);
-      } 
+      }
     };
     getData();
-  }, [currentPage])
+  }, [currentPage]);
 
   const transformHotels = (data) => {
-  return data.map((hotel) => {
-    let image = hotel.thumbnails && hotel.thumbnails.length > 0
-      ? hotel.thumbnails[0].uuid
-      : null;
+    return data.map((hotel) => {
+      let image = hotel.thumbnails && hotel.thumbnails.length > 0
+        ? hotel.thumbnails[0].uuid
+        : null;
 
-    if (!image && hotel.images && hotel.images.length > 0) {
-      const primaryImage = hotel.images.find(img => img.uuid);
-      image = primaryImage ? primaryImage.uuid : null;
-    }
+      if (!image && hotel.images && hotel.images.length > 0) {
+        const primaryImage = hotel.images.find(img => img.uuid);
+        image = primaryImage ? primaryImage.uuid : null;
+      }
 
-    if (!image) {
-      image = '/images/404.jpg';
-    }
+      if (!image) {
+        image = '/images/404.jpg';
+      }
 
-    return {
-      uuid: hotel.uuid,
-      name: hotel.name || "Unknown Hotel",
-      address: hotel.address 
-        ? `${hotel.address.block || ""} ${hotel.address.streetName || ""}, ${hotel.address.postalCode || ""}`
-        : "Unknown address",
-      rating: hotel.rating > 0 ? hotel.rating : "No Rating", // 处理 0 评分
-      price: hotel.leadInRoomRates || "No Price",
-      image, // 确保最终 `image` 是有效的
-      amenities: hotel.amenities ? hotel.amenities.split(/[;,]/) : [], // 处理设施
-    };
-  });
-};
-
+      return {
+        uuid: hotel.uuid,
+        name: hotel.name || "Unknown Hotel",
+        address: hotel.address 
+          ? `${hotel.address.block || ""} ${hotel.address.streetName || ""}, ${hotel.address.postalCode || ""}`
+          : "Unknown address",
+        rating: hotel.rating, 
+        price: hotel.leadInRoomRates || "No Price",
+        image,
+        amenities: hotel.amenities ? hotel.amenities.split(/[;,]/) : [],
+      };
+    });
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -89,7 +97,7 @@ const HotelPage = () => {
       </main>
       <Footer />
     </div>
-  )
-}
+  );
+};
 
 export default HotelPage;
