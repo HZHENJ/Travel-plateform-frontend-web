@@ -171,6 +171,7 @@ const SchedulePage = () => {
             setReviewModal(false);
             alert("Review submitted successfully!");
         } catch (error) {
+            console.log(error)
             alert("Failed to submit review.");
         }
     };

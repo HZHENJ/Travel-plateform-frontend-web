@@ -27,7 +27,7 @@ const RecommendationCard = ({item}) => {
     getData();
   }, [item.uuid]);
 
-  console.log(attractionDetail)
+  // console.log(attractionDetail)
 
   if (!attractionDetail) {
     return <p>Loading ... </p>

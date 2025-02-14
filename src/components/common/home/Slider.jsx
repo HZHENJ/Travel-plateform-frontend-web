@@ -2,19 +2,23 @@ import { useState } from "react";
 import RecommendationCard from "./RecommendationCard";
 
 const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
+  if (!items || items.length === 0) return null;
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // console.log(items)
-  const maxIndex = Math.max(0, items.length - visibleItems);
+  const totalItems = items.length;
+  const maxIndex = Math.max(0, totalItems - visibleItems);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % (items.length - visibleItems + 1));
+    if (currentIndex < maxIndex) {
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+    }
   };
 
   const prevSlide = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + (items.length - visibleItems + 1)) % (items.length - visibleItems + 1)
-    );
+    if (currentIndex > 0) {
+      setCurrentIndex((prevIndex) => prevIndex - 1);
+    }
   };
   
 
@@ -36,24 +40,29 @@ const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
             </div>
           ))}
         </div>
-        {/* 左滑按钮 */}
-        {currentIndex > 0 && (
-          <button
-            onClick={prevSlide}
-            className="absolute top-1/2 left-0 z-10 transform -translate-y-1/2 bg-gray-700 bg-opacity-80 hover:bg-opacity-100 text-white font-bold py-3 px-4 rounded-r-full shadow-lg transition duration-200"
-          >
-            &#8249;
-          </button>
-        )}
 
-        {/* 右滑按钮 */}
-        {currentIndex < maxIndex && (
-          <button
-            onClick={nextSlide}
-            className="absolute top-1/2 right-0 z-10 transform -translate-y-1/2 bg-gray-700 bg-opacity-80 hover:bg-opacity-100 text-white font-bold py-3 px-4 rounded-l-full shadow-lg transition duration-200"
-          >
-            &#8250;
-          </button>
+        {totalItems > visibleItems && (
+          <>
+            {/* 左滑按钮 */}
+            {currentIndex > 0 && (
+              <button
+                onClick={prevSlide}
+                className="absolute top-1/2 left-0 z-10 transform -translate-y-1/2 bg-gray-700 bg-opacity-80 hover:bg-opacity-100 text-white font-bold py-3 px-4 rounded-r-full shadow-lg transition duration-200"
+              >
+                &#8249;
+              </button>
+            )}
+
+            {/* 右滑按钮 */}
+            {currentIndex < maxIndex && (
+              <button
+                onClick={nextSlide}
+                className="absolute top-1/2 right-0 z-10 transform -translate-y-1/2 bg-gray-700 bg-opacity-80 hover:bg-opacity-100 text-white font-bold py-3 px-4 rounded-l-full shadow-lg transition duration-200"
+              >
+                &#8250;
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>
