@@ -60,7 +60,7 @@ const SchedulePage = () => {
                 }),
             ]);
 
-            console.log("Bookings:", bookings); // 👀 打印返回的数据类型
+            console.log("Bookings:", bookings); // 打印返回的数据类型
             console.log("HotelBookings:", hotelBookings);
             
             // 确保 `bookings` 和 `hotelBookings` 都是数组
@@ -113,7 +113,7 @@ const SchedulePage = () => {
                         status: booking.status
                     }));
             }
-            // **合并事件，不管 bookins 或 hotelBookings 是否为空**
+            // 合并事件，不管 bookins 或 hotelBookings 是否为空
             const allEvents = [...transformedAttractionEvents, ...transformedHotelEvents];
 
             console.log("Final Events:", allEvents); // Debugging output
