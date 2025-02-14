@@ -29,7 +29,6 @@ const AttractionCard = ({ attraction }) => {
                     </svg>
                     <span className="ml-1">{attraction.rating}</span>
                 </div>
-                {/* <p className="text-sm text-gray-600 mb-2 line-clamp-2">{attraction.description}</p> */}
 
                 {/* amenities area */}
                 <div className="flex flex-wrap">

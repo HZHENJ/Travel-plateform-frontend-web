@@ -63,7 +63,7 @@ export const fetchHotelsByUUID = async(uuid) => {
 // }
 export const sendHotelBookingToBackEnd = async (hotelBooking) => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/api/hotels/booking`, hotelBooking, {
+    const response = await axios.post(`${BACKEND_URL}/hotels/booking`, hotelBooking, {
       headers: { "Content-Type": "application/json" }
     });
     return response;
@@ -74,7 +74,7 @@ export const sendHotelBookingToBackEnd = async (hotelBooking) => {
 
 export const cancelHotelBooking = async (bookingId) => {
   try {
-      const response = await axios.delete(`${BACKEND_URL}/api/hotels/booking/${bookingId}`);
+      const response = await axios.delete(`${BACKEND_URL}/hotels/booking/${bookingId}`);
       return response.data;
   } catch (error) {
       console.error("Error canceling hotel booking:", error);
@@ -85,7 +85,7 @@ export const cancelHotelBooking = async (bookingId) => {
 // fetch review & rating from backend
 export const fetchReviewRatingByUUID = async(uuid) => {
   try {
-    const response = await axios.get(`${BACKEND_URL}/api/hotels/${uuid}/reviews`)
+    const response = await axios.get(`${BACKEND_URL}/hotels/${uuid}/reviews`)
     return response.data;
   } catch (error) {
     console.error("fetchReviewRatingByUUID", error);

@@ -42,12 +42,6 @@ const SchedulePage = () => {
         const loadSchedule = async () => {
             if (!userId) return;
 
-            // 1. 并行获取AttractionBooking & HotelBooking
-            // const [bookings, hotelBookings] = await Promise.all([
-            //     fetchUserSchedule(userId),
-            //     fetchUserHotelBookings(userId),
-            // ]);
-
             // 1. 并行获取 AttractionBooking & HotelBooking
             const [bookings, hotelBookings] = await Promise.all([
                 fetchUserSchedule(userId).catch(error => {

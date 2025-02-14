@@ -25,7 +25,7 @@ const ImageCarousel = ({ images }) => {
   }
 
   const getImageURLByUUID = (uuid, fileType) => {
-    return `${BACKEND_URL}/proxy/media/${uuid}${fileType ? '?fileType=' + encodeURIComponent(fileType) : ''}`;
+    return `${BACKEND_URL}/api/proxy/media/${uuid}${fileType ? '?fileType=' + encodeURIComponent(fileType) : ''}`;
   }
 
   return (
@@ -105,7 +105,7 @@ const HotelDetailPage = () => {
   }, [uuid]);
 
   // debug
-  console.log("review:", reviews)
+  // console.log("review:", reviews)
   // console.log("hotel detail:", hotelDetail)
 
   // UI

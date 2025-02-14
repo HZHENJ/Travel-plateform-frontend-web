@@ -21,7 +21,7 @@ const HotelPage = () => {
       try {
         const response = await fetchHotels(offset, hotelsPerPage);
         if (response && response.data) {
-          console.log(response.data.data)
+          // console.log(response.data.data)
           // 1.transform the data
           let newHotels = transformHotels(response.data.data);
           // 2. 过滤掉没有价格的酒店
