@@ -8,9 +8,9 @@ import { Calendar } from "@/components/ui/calendar"
 import { sendHotelBookingToBackEnd } from "../../../api/hotels.jsx"
 
 const roomTypes = [
-  { id: "standard", name: "标准间", price: 1 },
-  { id: "deluxe", name: "豪华间", price: 2 },
-  { id: "suite", name: "套房", price: 3 },
+  { id: "standard", name: "standard"},
+  { id: "deluxe", name: "deluxe"},
+  { id: "suite", name: "suite" },
 ]
 
 export default function BookingModal({ uuid, isOpen, onClose }) {
@@ -119,9 +119,7 @@ export default function BookingModal({ uuid, isOpen, onClose }) {
               </SelectTrigger>
               <SelectContent>
                 {roomTypes.map((room) => (
-                  <SelectItem key={room.id} value={room.id}>
-                    {room.name} - ${room.price}/day
-                  </SelectItem>
+                  <SelectItem key={room.id} value={room.id}>{room.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -136,9 +134,7 @@ export default function BookingModal({ uuid, isOpen, onClose }) {
               </SelectTrigger>
               <SelectContent>
                 {[1, 2, 3, 4].map((num) => (
-                  <SelectItem key={num} value={num.toString()}>
-                    {num}人
-                  </SelectItem>
+                  <SelectItem key={num} value={num.toString()}>{num} pax</SelectItem>
                 ))}
               </SelectContent>
             </Select>

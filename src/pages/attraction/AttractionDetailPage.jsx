@@ -3,11 +3,13 @@ import { ArrowLeft, ArrowRight, Star, MapPin, Clock, Ticket, Navigation, Mail, G
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 
+import { format } from 'date-fns';
+
 import { Button } from "@/components/ui/button"
 import { BookingModal } from "@/components/common/attraction/BookingModal";
 
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchAttractoionsByUUID, fetchReviewRatingByUUID } from "../../api/attractions";
+import { fetchAttractoionsByUUID, fetchReviewRatingByUUID, fetchReviewStatsByUUID } from "../../api/attractions";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -66,6 +68,7 @@ const AttractionDetailPage = () => {
   const [reviews, setReviews] = useState({})
   const [visibleReviews, setVisibleReviews] = useState(3)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+
   const openBookingModal = useCallback(() => setIsBookingModalOpen(true), [])
   const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), [])
 
@@ -82,30 +85,48 @@ const AttractionDetailPage = () => {
 
   useEffect(() => {
     const getData = async () => {
-      // fetch data
+      try {
+        // 获取景点详情
+        const attractionResponse = await fetchAttractoionsByUUID(uuid);
+        const attraction = Array.isArray(attractionResponse.data) && attractionResponse.data.length > 0 ? attractionResponse.data[0] : null;
+        
+        if (!attraction) {
+          console.error("Attraction not found");
+          return;
+        }
+
+        // 获取评分和评论数量
+        let averageRating = 0;
+        let totalReviews = 0;
+        try {
+            const statsResponse = await fetchReviewStatsByUUID(uuid);
+            averageRating = statsResponse?.data?.averageRating || 0;
+            totalReviews = statsResponse?.data?.totalReviews || 0;
+        } catch (error) {
+            console.error(`Error fetching rating and reviews for ${uuid}:`, error);
+        }
+
+        // 更新状态，合并评分和评论数
+        setAttractions({
+          ...attraction,
+          rating: averageRating,
+          reviewCount: totalReviews,
+        });
+      } catch (error) {
+        console.error("Error fetching attraction details:", error);
+      }
+
+      // 获取评论数据
       try {
         const reviewsData = await fetchReviewRatingByUUID(uuid); // 这里注意需要有数据库才可以！！！
         const filteredReviews = reviewsData.filter(review => review.status === "show");
         setReviews(filteredReviews)
       } catch (error) {
-        console.error("reviewsData - no uuid", error)
-      }
-
-      // 
-      try {
-        const attractionData = await fetchAttractoionsByUUID(uuid);
-        const attraction = Array.isArray(attractionData.data) && attractionData.data.length > 0 ? attractionData.data[0] : null;
-        setAttractions(attraction)
-      } catch (error) {
-        console.error("attraction", error)
+        console.error("Error fetching reviews:", error)
       }
     };
     getData();
   }, [uuid]);
-
-  // debug
-  // console.log("attractionDetail detail:", attractionDetail)
-  // console.log("Reviews:", reviews)
 
   // UI
   if (!attractionDetail) {
@@ -262,7 +283,7 @@ const AttractionDetailPage = () => {
                   <span className="ml-1 font-semibold">{review.rating}</span>
                 </div>
                 <p className="text-gray-700 mb-2">{review.comment}</p>
-                <p className="text-sm text-gray-500">- {review.username}</p>
+                <p className="text-sm text-gray-500">{format(new Date(review.updatedAt), 'MMM d, yyyy HH:mm')}</p>
               </div>
             )) : <p>No Reviews</p>
           }

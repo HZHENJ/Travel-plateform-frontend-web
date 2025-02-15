@@ -26,7 +26,7 @@ export const fetchPopularRecommendations = async () => {
 // checkIfNewUser
 export const checkIfNewUser = async (userId) => {
   try {
-    const response = await axios.get(`${BACKEND_URL}/api/auth/${userId}/is-new-attraction-user`);
+    const response = await axios.get(`${BACKEND_URL}/auth/${userId}/is-new-attraction-user`);
     return response.data;
   } catch (error) {
     console.error("famous", error);

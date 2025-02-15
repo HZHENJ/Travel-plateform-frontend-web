@@ -54,7 +54,7 @@ export const fetchAttractoionsByUUID = async(uuid) => {
 // fetch review & rating from backend
 export const fetchReviewRatingByUUID = async(uuid) => {
   try {
-    const response = await axios.get(`${BACKEND_URL}/api/attractions/${uuid}/reviews`)
+    const response = await axios.get(`${BACKEND_URL}/attractions/${uuid}/reviews`)
     return response.data;
   } catch (error) {
     console.error("fetchReviewRatingByUUID", error);
@@ -62,10 +62,20 @@ export const fetchReviewRatingByUUID = async(uuid) => {
   }
 };
 
+export const fetchReviewStatsByUUID = async(uuid) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/reviews/attraction/${uuid}`)
+    return response;
+  } catch (error) {
+    console.error("fetchReviewStatsByUUID", error);
+    throw error;
+  }
+}
+
 // send transformed attraction data to backend
 export const sendTransformedAttractionDataToBackEnd = async(attractions) => {
   try {
-    const response = await fetch(`${BACKEND_URL}/api/attractions/save`, {
+    const response = await fetch(`${BACKEND_URL}/attractions/save`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(attractions),
@@ -91,7 +101,7 @@ export const sendTransformedAttractionDataToBackEnd = async(attractions) => {
 // }
 export const sendAttractionBookingToBackEnd = async (attractionBooking) => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/api/attractions/booking`, attractionBooking, {
+    const response = await axios.post(`${BACKEND_URL}/attractions/booking`, attractionBooking, {
       headers: { "Content-Type": "application/json" }
     });
     return response
@@ -103,7 +113,7 @@ export const sendAttractionBookingToBackEnd = async (attractionBooking) => {
 // 取消景点预订
 export const cancelAttractionBooking = async (bookingId) => {
   try {
-      const response = await axios.delete(`${BACKEND_URL}/api/attractions/booking/${bookingId}`);
+      const response = await axios.delete(`${BACKEND_URL}/attractions/booking/${bookingId}`);
       return response.data;
   } catch (error) {
       console.error("Error canceling attraction booking:", error);

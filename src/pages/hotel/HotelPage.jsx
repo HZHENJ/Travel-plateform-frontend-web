@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import { fetchHotels, getHotelRating } from "../../api/hotels"
+import { fetchHotels, fetchReviewStatsByUUID } from "../../api/hotels"
+
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 import HotelCard from "../../components/common/hotel/HotelCard"
@@ -15,65 +16,81 @@ const HotelPage = () => {
 
   useEffect(() => {
     const getData = async () => {
-      try {
-        const response = await fetchHotels(offset, hotelsPerPage);
+        try {
+            const response = await fetchHotels(offset, hotelsPerPage);
+            if (response && response.data) {
+                // 转换酒店数据
+                let newHotels = transformHotels(response.data.data);
 
-        if (response && response.data) {
-          console.log(response.data.data);
-          // 1. transform the data
-          let newHotels = transformHotels(response.data.data);
-          
-          // 2. 获取所有酒店的评分
-          const ratings = await Promise.all(newHotels.map(hotel =>
-            getHotelRating(hotel.uuid)
-          ));
+                // 获取所有酒店的 UUID
+                const uuids = newHotels.map(hotel => hotel.uuid);
 
-          // 3. 将评分赋值给对应的酒店
-          newHotels = newHotels.map((hotel, index) => ({
-            ...hotel,
-            rating: ratings[index] || hotel.rating, // 如果没有评分，保持原来的 rating
-          }));
+                // 批量获取评分
+                const stats = await Promise.all(
+                    uuids.map(async (uuid) => {
+                        try {
+                            const statsResponse = await fetchReviewStatsByUUID(uuid);
+                            console.log(statsResponse)
+                            return {
+                                averageRating: statsResponse?.data?.averageRating || 0,
+                                totalReviews: statsResponse?.data?.totalReviews || 0,
+                            };
+                        } catch (error) {
+                            console.error(`Error fetching rating for ${uuid}:`, error);
+                            return { averageRating: 0, totalReviews: 0 }; // 出错时返回默认值
+                        }
+                    })
+                );
 
-          setHotels(newHotels);
+                // 将评分数据合并到酒店列表
+                newHotels = newHotels.map((hotel, index) => ({
+                    ...hotel,
+                    rating: stats[index].averageRating,
+                    totalReviews: stats[index].totalReviews,
+                }));
 
-          // 4. 获取总页数
-          setTotalPages(Math.ceil(response.data.totalRecords / hotelsPerPage));
+                setHotels(newHotels);
+                setTotalPages(Math.ceil(response.data.totalRecords / hotelsPerPage));
+            }
+        } catch (error) {
+            console.error("Error fetching hotels:", error);
         }
-      } catch (error) {
-        console.error("Error", error);
-      }
     };
+
     getData();
-  }, [currentPage]);
+  }, [currentPage]); // 监听当前页面变化
 
   const transformHotels = (data) => {
-    return data.map((hotel) => {
-      let image = hotel.thumbnails && hotel.thumbnails.length > 0
-        ? hotel.thumbnails[0].uuid
-        : null;
+      return data.map((hotel) => {
+          let image = hotel.thumbnails && hotel.thumbnails.length > 0
+              ? hotel.thumbnails[0].uuid
+              : null;
 
-      if (!image && hotel.images && hotel.images.length > 0) {
-        const primaryImage = hotel.images.find(img => img.uuid);
-        image = primaryImage ? primaryImage.uuid : null;
-      }
+          if (!image && hotel.images && hotel.images.length > 0) {
+              const primaryImage = hotel.images.find(img => img.uuid);
+              image = primaryImage ? primaryImage.uuid : null;
+          }
 
-      if (!image) {
-        image = '/images/404.jpg';
-      }
+          if (!image) {
+              image = '/images/404.jpg';
+          }
 
-      return {
-        uuid: hotel.uuid,
-        name: hotel.name || "Unknown Hotel",
-        address: hotel.address 
-          ? `${hotel.address.block || ""} ${hotel.address.streetName || ""}, ${hotel.address.postalCode || ""}`
-          : "Unknown address",
-        rating: hotel.rating, 
-        price: hotel.leadInRoomRates || "No Price",
-        image,
-        amenities: hotel.amenities ? hotel.amenities.split(/[;,]/) : [],
-      };
-    });
+          return {
+              uuid: hotel.uuid,
+              name: hotel.name || "Unknown Hotel",
+              address: hotel.address 
+                  ? `${hotel.address.block || ""} ${hotel.address.streetName || ""} ${hotel.address.postalCode || ""}`
+                  : "Unknown address",
+              rating: 0, // 默认评分，后续由 API 更新
+              totalReviews: 0, // 默认评论数
+              price: hotel.leadInRoomRates || "No Price",
+              image,
+              amenities: hotel.amenities ? hotel.amenities.split(/[;,]/) : [],
+          };
+      });
   };
+
+
 
   return (
     <div className="min-h-screen flex flex-col">
