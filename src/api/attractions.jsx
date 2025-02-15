@@ -28,6 +28,29 @@ export const fetchAttraction = async (offset = 0, limit = 6) => {
     }
 };
 
+export const fetchAttractionByKeyword = async (searchValues = "", offset = 0, limit = 6) => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/content/attractions/v2/search`, {
+      params: { 
+        searchType: "keyword",
+        searchValues: searchValues,
+        offset, 
+        limit, 
+      },
+      headers: {
+        "X-API-Key": API_KEY,
+        "X-Content-Language": CONTENT_LANGUAGE,
+      },
+    });
+    
+    return response;
+  } catch (error) {
+    console.error("fetchHotels", error);
+    throw error;
+  }
+};
+
 // fetch attraction by uuid
 export const fetchAttractoionsByUUID = async(uuid) => {
     const searchValues = Array.isArray(uuid) ? uuid.join(",") : uuid;
