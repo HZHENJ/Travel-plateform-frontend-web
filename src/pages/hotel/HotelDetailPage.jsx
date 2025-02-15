@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { Button } from "@/components/ui/button"
 
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchHotelsByUUID, fetchReviewRatingByUUID } from "../../api/hotels";
+import { fetchHotelsByUUID, fetchReviewRatingByUUID, fetchReviewStatsByUUID } from "../../api/hotels";
 
 import HotelBookingModal from "../../components/common/hotel/BookingModal"; 
 
@@ -83,30 +83,50 @@ const HotelDetailPage = () => {
 
   useEffect(() => {
     const getData = async () => {
-      // fetch review
-      try {
-        const reviewsData = await fetchReviewRatingByUUID(uuid); // 这里注意需要有数据库才可以！！！
-        const filteredReviews = reviewsData.filter(review => review.status === "show");
-        setReviews(filteredReviews)
-      } catch (error) {
-        console.error("reviewsData - no uuid", error)
-      }
+        try {
+            // 获取酒店详情
+            const hotelResponse = await fetchHotelsByUUID(uuid);
+            const hotel = Array.isArray(hotelResponse.data) && hotelResponse.data.length > 0 ? hotelResponse.data[0] : null;
 
-      // fetch hotel
-      try {
-        const hotelData = await fetchHotelsByUUID(uuid);
-        const hotel = Array.isArray(hotelData.data) && hotelData.data.length > 0 ? hotelData.data[0] : null;
-        setHotels(hotel)
-      } catch (error) {
-        console.error("hotel", error)
-      }
+            if (!hotel) {
+                console.error("Hotel not found");
+                return;
+            }
+
+            // 获取评分和评论数量
+            let averageRating = 0;
+            let totalReviews = 0;
+            try {
+                const statsResponse = await fetchReviewStatsByUUID(uuid);
+                averageRating = statsResponse?.data?.averageRating || 0;
+                totalReviews = statsResponse?.data?.totalReviews || 0;
+            } catch (error) {
+                console.error(`Error fetching rating and reviews for ${uuid}:`, error);
+            }
+
+            // 更新状态，合并评分和评论数
+            setHotels({
+                ...hotel,
+                rating: averageRating,
+                reviewCount: totalReviews,
+            });
+        } catch (error) {
+            console.error("Error fetching hotel details:", error);
+        }
+
+        // 获取评论数据
+        try {
+            const reviewsData = await fetchReviewRatingByUUID(uuid);
+            const filteredReviews = reviewsData.filter(review => review.status === "show");
+            setReviews(filteredReviews);
+        } catch (error) {
+            console.error("Error fetching reviews:", error);
+        }
     };
-    getData();
-  }, [uuid]);
 
-  // debug
-  // console.log("review:", reviews)
-  // console.log("hotel detail:", hotelDetail)
+    getData();
+}, [uuid]);
+
 
   // UI
   if (!hotelDetail) {
@@ -135,7 +155,7 @@ const HotelDetailPage = () => {
                   <div className="flex items-center mb-4">
                     <Star className="text-yellow-400 w-5 h-5" />
                     <span className="ml-1 font-semibold">{hotelDetail.rating}</span>
-                    <span className="ml-2 text-gray-600">({1000}+ reviews)</span>
+                    <span className="ml-2 text-gray-600">({hotelDetail.reviewCount}+ reviews)</span>
                   </div>
                 </div>
                 <Button onClick={openBookingModal} className="bg-blue-500">Book Now</Button>

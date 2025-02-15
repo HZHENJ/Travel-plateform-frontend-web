@@ -92,3 +92,13 @@ export const fetchReviewRatingByUUID = async(uuid) => {
     throw error;
   }
 };
+
+export const fetchReviewStatsByUUID = async(uuid) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/reviews/hotel/${uuid}`)
+    return response;
+  } catch (error) {
+    console.error("fetchReviewStatsByUUID", error);
+    throw error;
+  }
+}

@@ -3,6 +3,8 @@ import { ArrowLeft, ArrowRight, Star, MapPin, Clock, Ticket, Navigation, Mail, G
 import Navbar from "../../components/layout/Navbar"
 import Footer from "../../components/layout/Footer";
 
+import { format } from 'date-fns';
+
 import { Button } from "@/components/ui/button"
 import { BookingModal } from "@/components/common/attraction/BookingModal";
 
@@ -66,6 +68,7 @@ const AttractionDetailPage = () => {
   const [reviews, setReviews] = useState({})
   const [visibleReviews, setVisibleReviews] = useState(3)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+
   const openBookingModal = useCallback(() => setIsBookingModalOpen(true), [])
   const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), [])
 
@@ -280,7 +283,7 @@ const AttractionDetailPage = () => {
                   <span className="ml-1 font-semibold">{review.rating}</span>
                 </div>
                 <p className="text-gray-700 mb-2">{review.comment}</p>
-                <p className="text-sm text-gray-500">- {review.username}</p>
+                <p className="text-sm text-gray-500">{format(new Date(review.updatedAt), 'MMM d, yyyy HH:mm')}</p>
               </div>
             )) : <p>No Reviews</p>
           }
