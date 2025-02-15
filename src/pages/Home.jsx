@@ -15,7 +15,6 @@ const Home = () => {
 
   const getRecommendations = async () => {
     const famous = await fetchPopularRecommendations();
-    // console.log(famous)
     setFamousAttractions(famous || []);
     
     if (userId) {
@@ -26,6 +25,7 @@ const Home = () => {
       // 只有老用户才获取个性化推荐
       if (!newUserStatus) {
         const personalized = await fetchPersonalizedRecommendations(userId);
+        console.log(personalized)
         setRecommendedAttractions(personalized || []);
       }
     }
@@ -54,6 +54,8 @@ const Home = () => {
                   items={famousAttractions}
                   visibleItems={visibleItems}
                 />
+
+                <Slider title="Personalized Recommendation" items={recommendedAttractions} visibleItems={visibleItems}/>
 
                 {
                   userId && !isNewUser && (

@@ -23,3 +23,25 @@ export const login = async (userData) => {
         throw error;
     }
 }
+
+// 从后端获取用户数据
+export const fetchUserProfile = async (userId) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/auth/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error;
+  }
+};
+
+// 更新用户偏好
+export const updateUserPreferences = async (userId, preferences) => {
+  try {
+    const response = await axios.put(`${BACKEND_URL}/auth/${userId}/preferences`, preferences);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating preferences:", error);
+    throw error;
+  }
+};
