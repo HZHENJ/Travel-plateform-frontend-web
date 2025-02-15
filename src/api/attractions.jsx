@@ -143,3 +143,13 @@ export const cancelAttractionBooking = async (bookingId) => {
       throw error;
   }
 }
+
+export const getAttractionRating = async (uuid) => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/api/attractions/${uuid}/rating`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching attraction rating:", error);
+    throw error;
+  }
+}

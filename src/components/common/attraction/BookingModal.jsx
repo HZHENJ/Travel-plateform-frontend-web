@@ -204,7 +204,7 @@ export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours, u
             {/* 总价 */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right">Total Price</Label>
-              <div className="w-[280px] font-semibold">${totalPrice.toFixed(2)}</div>
+              <div className="w-[280px] font-semibold">${ totalPrice >= 0 ?totalPrice.toFixed(2): "Free"}</div>
             </div>
 
           </div>
