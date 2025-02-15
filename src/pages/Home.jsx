@@ -55,8 +55,6 @@ const Home = () => {
                   visibleItems={visibleItems}
                 />
 
-                <Slider title="Personalized Recommendation" items={recommendedAttractions} visibleItems={visibleItems}/>
-
                 {
                   userId && !isNewUser && (
                     <Slider title="Personalized Recommendation" items={recommendedAttractions}visibleItems={visibleItems}/>

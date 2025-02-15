@@ -27,18 +27,24 @@ const RecommendationCard = ({item}) => {
     getData();
   }, [item.uuid]);
 
-  // console.log(attractionDetail)
+  console.log(attractionDetail)
 
   if (!attractionDetail) {
     return <p>Loading ... </p>
   }
+
+  // 处理图片逻辑：优先使用 `thumbnails[0].uuid`，如果为空则使用 `images[0].uuid`
+  const imageUuid =
+  attractionDetail?.thumbnails?.[0]?.uuid ||
+  attractionDetail?.images?.[0]?.uuid ||
+  "";
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 transform hover:scale-105 hover:z-50 h-96 w-72 mx-auto flex flex-col"
         onClick={handleClick}>
       {/* image area */}
       <div className="w-full h-48 overflow-hidden">
-        <MediaImage uuid={attractionDetail.thumbnails[0].uuid} fileType={"Small Thumbnail"}/>
+        <MediaImage uuid={imageUuid} fileType={"Small Thumbnail"}/>
       </div>
       <div className="p-4 flex-grow flex flex-col justify-between">
         <div>

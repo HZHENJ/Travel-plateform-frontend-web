@@ -5,7 +5,6 @@ const Slider = ({ title, items, visibleItems, isSidebarOpen }) => {
   if (!items || items.length === 0) return null;
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // console.log(items)
   const totalItems = items.length;
   const maxIndex = Math.max(0, totalItems - visibleItems);
 
