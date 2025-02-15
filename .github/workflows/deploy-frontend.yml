@@ -10,75 +10,75 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 拉取代码
+      - name: Pull code
         uses: actions/checkout@v3
 
-      - name: 设置 Node.js 环境
+      - name: Set up the Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: 安装依赖 & 构建前端
+      - name: Install dependencies & build frontend
         run: |
           npm install
           npm run build
           ls -la dist/
 
-      - name: 登录 Docker Hub
+      - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: 构建 Docker 镜像
+      - name: Build a Docker image
         run: |
           docker build -t hzhenj/frontend-web .
           docker tag hzhenj/frontend-web:latest hzhenj/frontend-web:latest
 
-      - name: 推送 Docker 镜像到 Docker Hub
+      - name: Push the Docker image to Docker Hub
         run: docker push hzhenj/frontend-web:latest
 
-      - name: SSH 连接到 EC2 并部署
+      - name: SSH to EC2 and deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 确保 Docker 已安装
+            # Make sure Docker is installed
             if ! command -v docker &> /dev/null
             then
-              echo "🚀 Docker 未安装，开始安装..."
+              echo "🚀 Docker is not installed, start installing..."
               sudo apt update
               sudo apt install docker.io -y
               sudo systemctl start docker
               sudo systemctl enable docker
             else
-              echo "✅ Docker 已安装"
+              echo "✅ Docker is installed"
             fi
 
-            # 确保 `ubuntu` 用户有 Docker 权限
+            # Make sure the `ubuntu` user has Docker permissions
             if ! groups | grep -q "docker"
             then
-              echo "🔑 授予 ubuntu 用户 Docker 访问权限..."
+              echo "🔑 Granting Docker access to the ubuntu user..."
               sudo usermod -aG docker $USER
               newgrp docker
             else
-              echo "✅ ubuntu 用户已具备 Docker 权限"
+              echo "✅ Ubuntu users already have Docker permissions"
             fi
 
-            # 拉取最新 Docker 镜像
+            # Pull the latest Docker image
             docker pull hzhenj/frontend-web:latest
 
-            # 强制删除已存在的 `frontend-web` 容器（无论是否运行）
+            # Forcefully delete existing `frontend-web` container (whether running or not)
             if [ "$(docker ps -aq -f name=frontend-web)" ]; then
-              echo "删除旧的 frontend-web 容器..."
+              echo "Remove old frontend-web container..."
               docker stop frontend-web || true
               docker rm frontend-web
             else
-              echo "没有需要删除的 frontend-web 容器"
+              echo "There is no frontend-web container to delete"
             fi
 
-            # 运行新容器，使用 Nginx 代理前端
-            echo "🚀 启动新容器..."
+            # Run the new container, using the Nginx proxy frontend
+            echo "🚀 Start new container..."
             docker run -d --name frontend-web -p 8081:8081 hzhenj/frontend-web:latest
 
-            # 重启 Nginx 以应用代理规则
+            # Restart Nginx to apply proxy rules
             sudo systemctl restart nginx
