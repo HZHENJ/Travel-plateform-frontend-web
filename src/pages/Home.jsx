@@ -54,12 +54,9 @@ const Home = () => {
                   items={famousAttractions}
                   visibleItems={visibleItems}
                 />
-
-                {
-                  userId && !isNewUser && (
-                    <Slider title="Personalized Recommendation" items={recommendedAttractions}visibleItems={visibleItems}/>
-                  )
-                }
+                {userId && !isNewUser ? (
+                  <Slider title="Personalized Recommendation" items={recommendedAttractions} visibleItems={Number.isNaN(visibleItems) ? 0 : visibleItems} />
+                ) : null}
               </div>
             </div>
           </div>
