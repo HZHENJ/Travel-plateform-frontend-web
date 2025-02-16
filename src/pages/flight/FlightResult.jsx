@@ -15,8 +15,10 @@ export default function FlightResults() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  
   useEffect(() => {
-    axios.post('http://localhost:8080/api/flights', {
+    axios.post(`${BACKEND_URL}/flights`, {
       from,
       to,
       date,
