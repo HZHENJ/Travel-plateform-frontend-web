@@ -69,12 +69,11 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent className="flex items-center space-x-6">
                 <Avatar className="h-24 w-24 border border-gray-300">
-                  <AvatarImage src={userData.avatarUrl || "/placeholder.svg"} alt={userData.name} />
+                  <AvatarImage src={userData.avatarUrl || "/images/avatar.jpg"} alt={userData.name} />
                   <AvatarFallback>{userData.name?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-2xl font-medium text-gray-900">{userData.name || "Unknown User"}</p>
-                  <p className="text-base text-gray-600">{userData.email}</p>
+                  <p className="text-2xl font-medium text-gray-900">{userData.email || "Unknown User"}</p>
                 </div>
               </CardContent>
             </Card>

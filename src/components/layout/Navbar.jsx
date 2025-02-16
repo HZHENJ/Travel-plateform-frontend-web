@@ -38,7 +38,13 @@ export default function Navbar () {
               src={isLoggedIn ? "/images/avatar.jpg" : "/images/avatar.jpg"}
               alt="User Avatar"
               className="w-10 h-10 rounded-full border-2 border-white"
-              onClick={() => {navigate("/profile")}}
+              onClick={() => {
+                if (isLoggedIn) {
+                  navigate("/profile");
+                } else {
+                    navigate("/signin"); // 未登录时跳转到登录页
+                }
+              }}
           />
           {isLoggedIn ? (
             <Link onClick={handleLogout} className="text-white font-semibold hover:text-blue-200 transition duration-300">Logout</Link>
