@@ -6,7 +6,7 @@ import Footer from "../components/layout/Footer";
 import { fetchPersonalizedRecommendations, fetchPopularRecommendations, checkIfNewUser } from "../api/recommendations"
 
 const Home = () => {
-  const [visibleItems, setVisibleItems] = useState(3);
+  const [visibleItems, setVisibleItems] = useState(4);
 
   const [famousAttractions, setFamousAttractions] = useState([]); // 著名景点
   const [recommendedAttractions, setRecommendedAttractions] = useState([]);

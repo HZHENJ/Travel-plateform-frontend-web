@@ -44,36 +44,36 @@ export default function LoginPage() {
       {/* left part */}
       <div className="hidden lg:flex w-1/2 flex-col justify-center items-start p-16 bg-white">
         <div className="mb-6">
-          {/* <img src="/logo.png" alt="Sitemark Logo" className="w-32 mb-6" /> */}
-          <h2 className="text-2xl font-extrabold text-blue-600">Travel</h2>
+          <h2 className="text-3xl font-extrabold text-blue-600">Explore & Travel</h2>
+          <p className="text-gray-500 mt-2">Your gateway to amazing experiences worldwide.</p>
         </div>
         <div className="space-y-6">
           <div className="flex items-center">
-            <span className="mr-4 text-blue-500">⚙️</span>
+            <span className="mr-4 text-blue-500">🌍</span>
             <div>
-              <h3 className="font-bold">Adaptable performance</h3>
-              <p className="text-gray-500">Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.</p>
+              <h3 className="font-bold">Discover the World</h3>
+              <p className="text-gray-500">Explore new destinations, from breathtaking landscapes to hidden gems.</p>
             </div>
           </div>
           <div className="flex items-center">
-            <span className="mr-4 text-blue-500">🛠️</span>
+            <span className="mr-4 text-blue-500">✈️</span>
             <div>
-              <h3 className="font-bold">Built to last</h3>
-              <p className="text-gray-500">Experience unmatched durability that goes above and beyond with lasting investment.</p>
+              <h3 className="font-bold">Seamless Booking</h3>
+              <p className="text-gray-500">Book flights, hotels, and attractions effortlessly with our user-friendly platform.</p>
             </div>
           </div>
           <div className="flex items-center">
-            <span className="mr-4 text-blue-500">👍</span>
+            <span className="mr-4 text-blue-500">🏝️</span>
             <div>
-              <h3 className="font-bold">Great user experience</h3>
-              <p className="text-gray-500">Integrate our product into your routine with an intuitive and easy-to-use interface.</p>
+              <h3 className="font-bold">Exclusive Experiences</h3>
+              <p className="text-gray-500">Gain access to exclusive travel deals, local insights, and unique activities.</p>
             </div>
           </div>
           <div className="flex items-center">
-            <span className="mr-4 text-blue-500">✨</span>
+            <span className="mr-4 text-blue-500">📍</span>
             <div>
-              <h3 className="font-bold">Innovative functionality</h3>
-              <p className="text-gray-500">Stay ahead with features that set new standards, addressing your evolving needs better than the rest.</p>
+              <h3 className="font-bold">Personalized Recommendations</h3>
+              <p className="text-gray-500">Get travel suggestions tailored to your preferences and past trips.</p>
             </div>
           </div>
         </div>
@@ -120,22 +120,6 @@ export default function LoginPage() {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                  Remember me
-                </label>
-              </div>
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                  Forgot your password?
-                </a>
-              </div>
             </div>
             <div>
               <button

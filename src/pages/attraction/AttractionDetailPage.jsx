@@ -68,10 +68,19 @@ const AttractionDetailPage = () => {
   const [reviews, setReviews] = useState({})
   const [visibleReviews, setVisibleReviews] = useState(3)
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const userId = parseInt(localStorage.getItem("userId"), 10);
 
-  const openBookingModal = useCallback(() => setIsBookingModalOpen(true), [])
   const closeBookingModal = useCallback(() => setIsBookingModalOpen(false), [])
 
+  const handleBookingClick = () => {
+  
+    if (!userId) {
+      navigate("/signin");
+    } else { // 否则打开预订模态框
+      setIsBookingModalOpen(true);
+    }
+  };
+  
   const loadMoreReviews = () => {
     setVisibleReviews(prev => prev + 3);  // 每次显示多 3 条评论
   };
@@ -81,6 +90,11 @@ const AttractionDetailPage = () => {
   // back to Hotels page
   const turnBack = () => {
     navigate('/attractions');
+  }
+
+  // 
+  const toSigin = () => {
+    navigate('/signin')
   }
 
   useEffect(() => {
@@ -181,7 +195,7 @@ const AttractionDetailPage = () => {
                   <span className="ml-2 text-gray-600">({attractionDetail.reviewCount} reviews)</span>
                 </div>
               </div>
-              <Button onClick={openBookingModal} className="bg-blue-500">Book Now</Button>
+              <Button onClick={handleBookingClick} className="bg-blue-500">Book Now</Button>
             </div>
 
             {/* address */}

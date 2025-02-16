@@ -48,15 +48,15 @@ const calculateWeeklyAvailableTimes = (businessHours) => {
 const convertToLocalDateTime = (date, timeString) => {
   if (!date || !timeString) return null;
 
-  // 解析时间字符串 ("11:00 AM" => Date 对象)
+  // 解析 `timeString`（"11:00 AM" => 小时 & 分钟）
   const parsedTime = parse(timeString, "hh:mm a", new Date());
 
-  // 组合 `date` 和 `parsedTime`
+  // 设置 `date` 的小时 & 分钟，避免时区偏移
   const visitDateTime = new Date(date);
   visitDateTime.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
 
-  // 转换为 ISO 8601 格式
-  return visitDateTime.toISOString();
+  // 返回本地时间字符串，而不是 UTC
+  return format(visitDateTime, "yyyy-MM-dd'T'HH:mm:ss");
 };
 
 export function BookingModal({ isOpen, onClose, pricePerPerson, businessHours, uuid}) {

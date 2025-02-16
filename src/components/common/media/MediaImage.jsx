@@ -8,7 +8,7 @@ const MediaImage = ({uuid, fileType, altText, className="w-full h-auto object-co
         <img
         src={imageUrl}
         alt={altText || "Media Image"}
-        onError={(e) => { e.target.src = '/images/404.jpg'; }}
+        onError={(e) => { e.target.src = '/images/01.jpg'; }}
         className={className}
         loading="lazy"
       />

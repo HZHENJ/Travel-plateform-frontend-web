@@ -349,7 +349,19 @@ const SchedulePage = () => {
 
                     {/* 右侧事件 */}
                     <div className="w-1/4">
-                        <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className="rounded-md border" />
+                    <Calendar 
+                        mode="single" 
+                        selected={selectedDate || new Date()} // 确保 Calendar 始终有值
+                        onSelect={(date) => {
+                            if (date && isSameDay(date, selectedDate)) {
+                                // 第二次点击相同日期 -> 取消选中
+                                setSelectedDate(null);
+                            } else {
+                                setSelectedDate(date);
+                            }
+                        }} 
+                        className="rounded-md border" 
+                    />
                     </div>
                 </div>
             </main>
