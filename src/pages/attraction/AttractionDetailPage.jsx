@@ -39,7 +39,8 @@ const ImageCarousel = ({ images }) => {
           }`}
         >
           <img
-            src={getImageURLByUUID(image.uuid, "Thumbnail 1080h") || "/placeholder.svg"}
+            src={getImageURLByUUID(image.uuid, "Thumbnail 1080h") || "/images/01.jpg"}
+            onError={(e) => { e.target.src = '/images/01.jpg'; }}
             alt={`images ${index + 1}`} className="w-full h-full object-cover" />
         </div>
       ))}

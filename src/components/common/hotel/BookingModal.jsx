@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
 import { sendHotelBookingToBackEnd } from "../../../api/hotels.jsx"
+import { useToast } from '../../../components/common/MessageBox'
 
 const roomTypes = [
   { id: "standard", name: "standard"},
@@ -18,6 +19,8 @@ export default function BookingModal({ uuid, isOpen, onClose }) {
   const [checkOut, setCheckOut] = useState(null)
   const [roomType, setRoomType] = useState("")
   const [guests, setGuests] = useState("")
+
+  const { addToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -40,7 +43,7 @@ export default function BookingModal({ uuid, isOpen, onClose }) {
     try {
       const response = await sendHotelBookingToBackEnd(bookingData);
       if (response.status === 200) {
-        alert("Booking successful!");
+        addToast("Booking Successful!", "success", 3000)
         onClose();
       } else {
         alert("Booking failed: " + response.data);
