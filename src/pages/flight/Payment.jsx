@@ -31,7 +31,7 @@ export default function Payment() {
 
     try {
       // 使用 fetch 或者 axios 发送 POST 请求
-      const response = await fetch('/api/flights/booking', {
+      const response = await fetch('/flights/booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

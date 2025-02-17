@@ -15,9 +15,10 @@ export default function FlightDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/flights/${id}`)
+    axios.get(`${BACKEND_URL}/flights/${id}`)
       .then(response => {
         const flight = response.data;
         const formattedDetails = {
