@@ -23,7 +23,7 @@ const Footer = () => (
             <ul className="space-y-2 text-gray-400">
               <li>Tel: +65 1234 5678</li>
               <li>Email: info@singaporetravel.com</li>
-              <li>Address: NUS-ISS</li>
+              <li>Address: NUS</li>
             </ul>
           </div>
           <div>
