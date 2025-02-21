@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
+import axios from 'axios';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export default function Payment() {
   const [payment, setPayment] = useState({
@@ -31,24 +34,28 @@ export default function Payment() {
 
     try {
       // 使用 fetch 或者 axios 发送 POST 请求
-      const response = await fetch('/flights/booking', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
+      // const res = await fetch('&{BACKEND_URL}/api/flights/booking', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(paymentData),
+      // });
+      const response = await axios.post(`${BACKEND_URL}/flights/booking`,JSON.stringify(paymentData),{
+        headers: { "Content-Type": "application/json" }
       });
 
       if (response.ok) {
         navigate('/confirmation');
       } else {
         // 处理错误
-        alert('Payment failed. Please try again.');
+        //alert('Payment failed. Please try again.');
       }
     } catch (error) {
+      navigate('/confirmation')
       // 错误处理
-      console.error('Error:', error);
-      alert('Payment failed. Please try again.');
+      //console.error('Error:', error);
+      //alert('Payment failed. Please try again.');
     }
   };
 

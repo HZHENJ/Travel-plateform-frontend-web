@@ -15,10 +15,9 @@ export default function FlightDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/flights/${id}`)
+    axios.get(`http://localhost:8080/api/flights/${id}`)
       .then(response => {
         const flight = response.data;
         const formattedDetails = {
@@ -117,7 +116,6 @@ export default function FlightDetail() {
 
           <button
           onClick={() => navigate('/seating', { state: { id, passengers, price} })}
-
             className="mt-8 bg-blue-600 text-white px-8 py-4 rounded-lg hover:bg-blue-700 w-full transition-colors"
           >
             Proceed to Seat Selection
